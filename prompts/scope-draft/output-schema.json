@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "required": ["projectSummary", "phases", "assumptions", "risks"],
+  "properties": {
+    "projectSummary": {
+      "type": "string"
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "areas"],
+        "properties": {
+          "name": { "type": "string" },
+          "areas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "items"],
+              "properties": {
+                "name": { "type": "string" },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["label", "status"],
+                    "properties": {
+                      "label": { "type": "string" },
+                      "status": { "type": "string" },
+                      "notes": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "risks": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

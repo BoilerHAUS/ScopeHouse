@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": ["summary", "progress", "blockers", "nextActions"],
+  "properties": {
+    "summary": { "type": "string" },
+    "progress": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "nextActions": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

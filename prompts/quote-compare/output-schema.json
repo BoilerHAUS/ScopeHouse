@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "required": ["summary", "coverageGaps", "overlaps", "risks"],
+  "properties": {
+    "summary": { "type": "string" },
+    "coverageGaps": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "overlaps": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "risks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "quoteNotes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["vendor", "notes"],
+        "properties": {
+          "vendor": { "type": "string" },
+          "notes": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}
