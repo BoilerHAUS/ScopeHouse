@@ -1,10 +1,6 @@
 import { SectionCard } from "@/components/data-display/section-card";
 
-const workflows = [
-  "Scope draft",
-  "Quote comparison",
-  "Progress summary",
-];
+const workflows = ["Scope draft", "Quote comparison", "Progress summary"];
 
 export function AIWorkflowsOverview() {
   return (
@@ -17,7 +13,7 @@ export function AIWorkflowsOverview() {
         {workflows.map((workflow) => (
           <div
             key={workflow}
-            className="rounded-xl border border-border px-3 py-3 text-sm text-muted"
+            className="border-border text-muted rounded-xl border px-3 py-3 text-sm"
           >
             {workflow}
           </div>

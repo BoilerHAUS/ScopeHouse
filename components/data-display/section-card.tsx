@@ -14,17 +14,17 @@ export function SectionCard({
   children,
 }: SectionCardProps) {
   return (
-    <section className="rounded-[1.75rem] border border-border bg-surface px-5 py-5 shadow-[0_16px_40px_rgba(54,42,20,0.06)] sm:px-6">
+    <section className="border-border bg-surface rounded-[1.75rem] border px-5 py-5 shadow-[0_16px_40px_rgba(54,42,20,0.06)] sm:px-6">
       <div className="space-y-3">
         {eyebrow ? (
-          <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted">
+          <p className="text-muted font-mono text-xs tracking-[0.24em] uppercase">
             {eyebrow}
           </p>
         ) : null}
         <div className="space-y-2">
           <h2 className="text-xl font-semibold tracking-[-0.03em]">{title}</h2>
           {description ? (
-            <p className="max-w-2xl text-sm leading-7 text-muted">
+            <p className="text-muted max-w-2xl text-sm leading-7">
               {description}
             </p>
           ) : null}

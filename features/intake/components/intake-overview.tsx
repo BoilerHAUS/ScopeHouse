@@ -15,9 +15,9 @@ export function IntakeOverview() {
       title="Structured ambiguity reduction"
       description="The intake system converts rough renovation ideas into usable planning inputs."
     >
-      <ul className="space-y-2 text-sm text-muted">
+      <ul className="text-muted space-y-2 text-sm">
         {intakeSignals.map((item) => (
-          <li key={item} className="rounded-xl bg-accent-soft/60 px-3 py-2">
+          <li key={item} className="bg-accent-soft/60 rounded-xl px-3 py-2">
             {item}
           </li>
         ))}

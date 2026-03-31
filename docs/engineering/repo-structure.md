@@ -5,6 +5,7 @@
 Create a repo structure that stays clean during MVP, supports fast iteration, and does not collapse into page-level chaos.
 
 This structure is designed for:
+
 - Next.js
 - TypeScript
 - Tailwind
@@ -104,6 +105,7 @@ components/
 ```
 
 Suggested contents:
+
 - app shell
 - header
 - sidebar
@@ -240,6 +242,7 @@ server/
 ```
 
 Suggested use:
+
 - database client setup
 - storage adapters
 - auth guards
@@ -388,6 +391,7 @@ Use for logos, icons, and fixed assets.
 Use for one-off developer tasks.
 
 Example:
+
 - seed scripts
 - migration helpers
 - import utilities
@@ -432,12 +436,14 @@ features/scope/
 Use direct names.
 
 Good:
+
 - create-project.ts
 - get-project-by-id.ts
 - compare-quotes-to-scope.ts
 - generate-scope-draft.ts
 
 Bad:
+
 - helpers.ts
 - stuff.ts
 - project-utils-final.ts
@@ -488,6 +494,7 @@ features/
 ScopeHouse is a renovation operating system for homeowners and renovation professionals.
 
 ## Stack
+
 - Next.js
 - TypeScript
 - Tailwind CSS
@@ -496,6 +503,7 @@ ScopeHouse is a renovation operating system for homeowners and renovation profes
 - OpenAI API
 
 ## Core product areas
+
 - Projects
 - Intake
 - Scope
@@ -509,12 +517,15 @@ ScopeHouse is a renovation operating system for homeowners and renovation profes
 - AI workflows
 
 ## Repo structure
+
 Short explanation of app, features, server, db, prompts, tests, and docs.
 
 ## Local setup
+
 Environment variables, install steps, run steps, and database setup.
 
 ## Development rules
+
 Keep page files thin.
 Keep business logic in features.
 Keep AI outputs structured.

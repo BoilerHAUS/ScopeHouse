@@ -12,6 +12,7 @@ Your engineering goal:
 Build a clean, modular, production-minded application that is fast to iterate on, easy to understand, and structured for future growth.
 
 Core engineering principles:
+
 1. Favor clarity over cleverness
 2. Favor maintainability over shortcuts
 3. Favor simple, extensible systems over overbuilt abstractions
@@ -23,6 +24,7 @@ Core engineering principles:
 
 Primary stack assumptions:
 Default to this stack unless instructed otherwise:
+
 1. Next.js
 2. TypeScript
 3. Tailwind CSS
@@ -37,6 +39,7 @@ Product architecture guidance:
 Build the app in a modular way.
 
 Separate concerns clearly:
+
 1. UI components
 2. Feature modules
 3. Domain logic
@@ -52,6 +55,7 @@ Prefer server actions or API routes only where appropriate and easy to reason ab
 
 Core product domains:
 Design code and schemas around these main domains:
+
 1. Workspace
 2. User
 3. Project
@@ -71,6 +75,7 @@ Design code and schemas around these main domains:
 17. Activity log
 
 MVP features to support:
+
 1. Project creation
 2. Guided renovation intake
 3. Scope builder
@@ -85,6 +90,7 @@ MVP features to support:
 12. AI-assisted project summaries
 
 Non-goals for early development:
+
 1. Full accounting
 2. Full CRM
 3. Procurement workflows
@@ -97,6 +103,7 @@ Code organization expectations:
 Use a folder structure that stays understandable as the project grows.
 
 Suggested top-level structure:
+
 1. app
 2. components
 3. features
@@ -132,6 +139,7 @@ Design schemas with strong naming and predictable relations.
 Use explicit status enums where needed.
 Track timestamps consistently.
 Support version history where product logic demands it, especially for:
+
 1. Scope
 2. Budget changes
 3. Change orders
@@ -152,6 +160,7 @@ Log prompts and outputs when useful for debugging.
 Use AI only where it saves time or improves clarity.
 
 Primary AI use cases:
+
 1. Draft renovation scopes from intake data
 2. Summarize meetings and notes
 3. Compare quotes against a project scope
@@ -166,6 +175,7 @@ Keep a human review step for high-impact outputs.
 Avoid hidden automation that changes core project records without confirmation.
 
 Coding standards:
+
 1. Type everything clearly
 2. Avoid large tangled files
 3. Write descriptive names
@@ -177,6 +187,7 @@ Coding standards:
 
 Commenting style:
 Use comments to explain:
+
 1. Why a decision was made
 2. Important constraints
 3. Business rules
@@ -188,6 +199,7 @@ Do not write filler comments.
 Testing expectations:
 Write tests for business-critical logic.
 Prioritize tests for:
+
 1. Budget calculations
 2. Change order impacts
 3. Schedule logic
@@ -221,6 +233,7 @@ Project summaries, scope docs, budget summaries, and change logs should be expor
 GitHub workflow expectations:
 Assume GitHub is the main operating layer.
 Help create:
+
 1. Clear README content
 2. Good issue breakdowns
 3. Useful milestones
@@ -230,6 +243,7 @@ Help create:
 7. Migration notes
 
 When asked to help with tasks, produce output ready for:
+
 1. GitHub issues
 2. Pull request plans
 3. Technical specs
@@ -239,6 +253,7 @@ When asked to help with tasks, produce output ready for:
 
 How to respond to engineering requests:
 If asked to plan a feature, structure the response like this:
+
 1. Objective
 2. User value
 3. Key requirements
@@ -250,6 +265,7 @@ If asked to plan a feature, structure the response like this:
 9. Suggested implementation steps
 
 If asked to write code:
+
 1. Write complete, coherent code
 2. Keep naming consistent
 3. Include type definitions where needed
@@ -258,6 +274,7 @@ If asked to write code:
 6. Avoid placeholder-heavy output unless explicitly requested
 
 If asked to review code:
+
 1. Look for logic bugs
 2. Look for maintainability problems
 3. Look for typing gaps

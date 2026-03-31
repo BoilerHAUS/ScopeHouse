@@ -16,7 +16,7 @@ export function ExportReadiness() {
         ].map((item) => (
           <div
             key={item}
-            className="rounded-[1.25rem] border border-border bg-surface-strong/45 px-4 py-4 text-sm text-muted"
+            className="border-border bg-surface-strong/45 text-muted rounded-[1.25rem] border px-4 py-4 text-sm"
           >
             {item}
           </div>

@@ -15,11 +15,11 @@ export function FeaturePlaceholder({
 }: FeaturePlaceholderProps) {
   return (
     <SectionCard eyebrow={eyebrow} title={title} description={description}>
-      <ul className="space-y-3 text-sm leading-7 text-muted">
+      <ul className="text-muted space-y-3 text-sm leading-7">
         {points.map((point) => (
           <li
             key={point}
-            className="rounded-2xl border border-border bg-surface-strong/50 px-4 py-3"
+            className="border-border bg-surface-strong/50 rounded-2xl border px-4 py-3"
           >
             {point}
           </li>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SectionCard } from "@/components/data-display/section-card";
+import { Button } from "@/components/ui/button";
 
 const verticalSlice = [
   "Create project",
@@ -22,9 +23,9 @@ export function ProjectLaunchpad() {
           {verticalSlice.map((step, index) => (
             <div
               key={step}
-              className="rounded-[1.5rem] border border-border bg-surface-strong/55 px-4 py-4"
+              className="border-border bg-surface-strong/55 rounded-[1.5rem] border px-4 py-4"
             >
-              <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted">
+              <p className="text-muted font-mono text-xs tracking-[0.24em] uppercase">
                 Step {index + 1}
               </p>
               <p className="mt-2 text-base font-medium">{step}</p>
@@ -32,18 +33,12 @@ export function ProjectLaunchpad() {
           ))}
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link
-            href="/projects"
-            className="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            Open project routes
-          </Link>
-          <Link
-            href="/projects/new"
-            className="rounded-full border border-border px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-accent-soft"
-          >
-            Start new project flow
-          </Link>
+          <Button asChild className="rounded-full px-5">
+            <Link href="/projects">Open project routes</Link>
+          </Button>
+          <Button asChild variant="outline" className="rounded-full px-5">
+            <Link href="/projects/new">Start new project flow</Link>
+          </Button>
         </div>
       </div>
     </SectionCard>

@@ -5,9 +5,24 @@
   --foreground: #1b1b18;
   --surface: #fffaf2;
   --surface-strong: #f0e5d5;
-  --border: rgba(27, 27, 24, 0.12);
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: #fffdf8;
+  --popover-foreground: var(--foreground);
+  --primary: #0d6b68;
+  --primary-foreground: #f7fbfa;
+  --secondary: #e8dbc8;
+  --secondary-foreground: #2d271f;
   --muted: #645e55;
-  --accent: #0d6b68;
+  --muted-foreground: #645e55;
+  --accent: #d6ecea;
+  --accent-foreground: #183836;
+  --destructive: #a2481f;
+  --destructive-foreground: #fff7f2;
+  --border: #d6cab7;
+  --input: #d6cab7;
+  --ring: #0d6b68;
+  --muted: #645e55;
   --accent-soft: #d6ecea;
   --warning: #9e5c26;
 }
@@ -17,9 +32,23 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-surface-strong: var(--surface-strong);
-  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --color-accent-soft: var(--accent-soft);
   --color-warning: var(--warning);
   --font-sans: var(--font-manrope);
@@ -32,7 +61,11 @@
 
 html {
   background:
-    radial-gradient(circle at top left, rgba(13, 107, 104, 0.1), transparent 28%),
+    radial-gradient(
+      circle at top left,
+      rgba(13, 107, 104, 0.1),
+      transparent 28%
+    ),
     linear-gradient(180deg, #f8f3eb 0%, #efe5d8 100%);
 }
 

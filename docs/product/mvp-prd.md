@@ -7,6 +7,7 @@ ScopeHouse is a renovation operating system for homeowners and renovation profes
 It helps users plan, price, run, track, and finish home renovation projects from first idea to final closeout.
 
 The product is built for two realities at once:
+
 - a serious homeowner needs structure without complexity
 - a renovation pro needs a system that feels disciplined, credible, and useful
 
@@ -44,6 +45,7 @@ Finish the renovation.
 ### Ideal early wedge
 
 The best early wedge is likely:
+
 - homeowners running complex renovations
 - solo GCs and small firms who need stronger project control but do not want heavy construction software
 
@@ -89,10 +91,13 @@ It needs a clean, credible core workflow.
 ### Included in MVP
 
 #### A. Project creation
+
 Users can create a project with a title, address or location label, project type, high-level goals, and status.
 
 #### B. Guided renovation intake
+
 Users answer structured intake questions about:
+
 - renovation type
 - rooms or areas involved
 - priorities
@@ -105,7 +110,9 @@ Users answer structured intake questions about:
 - special notes
 
 #### C. Scope builder
+
 Users can turn intake data into a structured scope organized by:
+
 - project
 - phase
 - room or area
@@ -114,26 +121,33 @@ Users can turn intake data into a structured scope organized by:
 Users can edit the scope manually.
 
 #### D. Budget planner
+
 Users can create and manage budget categories and line items.
 Users can assign estimates, allowances, quoted values, and actuals later.
 Users can track budget status at a simple but useful level.
 
 #### E. Schedule planner
+
 Users can define phases, milestones, and target timing.
 The MVP schedule can stay lightweight.
 It should support sequencing and visibility, not complex CPM logic.
 
 #### F. Document storage
+
 Users can upload and organize project documents.
 
 #### G. Photo log
+
 Users can upload and organize project photos with timestamps, captions, and optional room or phase tagging.
 
 #### H. Decision log
+
 Users can record project decisions with date, owner, summary, and status.
 
 #### I. Change order basics
+
 Users can create and track scope or budget changes with:
+
 - title
 - description
 - impact summary
@@ -142,7 +156,9 @@ Users can create and track scope or budget changes with:
 - linked budget or schedule impact
 
 #### J. PDF export
+
 Users can export a clean summary of the project including:
+
 - intake summary
 - draft scope
 - budget summary
@@ -151,12 +167,15 @@ Users can export a clean summary of the project including:
 - change log
 
 #### K. AI-assisted scope drafting
+
 AI turns intake data into a first-pass scope draft.
 
 #### L. AI-assisted quote comparison
+
 AI helps compare vendor quotes against the defined scope.
 
 #### M. AI-assisted progress summaries
+
 AI helps summarize project state from notes, decisions, and changes.
 
 ## 9. Non-Goals for MVP
@@ -175,18 +194,21 @@ The MVP should not include:
 ## 10. Primary Workflows
 
 ### Workflow 1, Create a new project
+
 User creates a project and enters basic details.
 
 Outcome:
 A project shell exists and is ready for intake.
 
 ### Workflow 2, Complete guided intake
+
 User answers renovation intake questions.
 
 Outcome:
 Project goals, scope signals, timing expectations, and budget context are captured in one place.
 
 ### Workflow 3, Generate and edit draft scope
+
 AI drafts a structured scope from intake data.
 User reviews and edits the scope.
 
@@ -194,36 +216,42 @@ Outcome:
 The project now has a working scope baseline.
 
 ### Workflow 4, Build initial budget
+
 User creates budget categories and line items tied to the project scope.
 
 Outcome:
 The project has a first-pass financial frame.
 
 ### Workflow 5, Build initial schedule
+
 User defines phases and milestones.
 
 Outcome:
 The project has a visible timeline structure.
 
 ### Workflow 6, Upload documents and photos
+
 User stores project files and images in one place.
 
 Outcome:
 The project gains a central source of truth.
 
 ### Workflow 7, Record decisions
+
 User logs decisions as the renovation evolves.
 
 Outcome:
 The project gains an auditable decision history.
 
 ### Workflow 8, Track changes
+
 User records change orders and links them to scope, budget, or schedule impact.
 
 Outcome:
 The project stays controlled as work changes.
 
 ### Workflow 9, Export project summary
+
 User exports a project summary as a PDF.
 
 Outcome:
@@ -260,54 +288,64 @@ The project is easy to share with contractors, clients, or internal stakeholders
 ## 13. Functional Requirements
 
 ### Project management
+
 - Create, edit, archive, and view projects
 - Track project status
 - Associate related records to a project
 
 ### Intake
+
 - Structured multi-step intake flow
 - Save progress
 - Edit responses later
 
 ### Scope
+
 - Generate AI draft from intake
 - Manual editing
 - Organize by phase, room, and work item
 - Track revisions or baseline state
 
 ### Budget
+
 - Create categories and line items
 - Assign estimate values
 - Support notes and source references
 - Roll up totals
 
 ### Schedule
+
 - Create phases and milestones
 - Assign rough dates or target timing
 - Show simple project sequence
 
 ### Documents and photos
+
 - Upload files
 - Associate records with rooms, phases, or project areas
 - View uploaded assets in project context
 
 ### Decisions
+
 - Log decisions
 - Track who made the decision
 - Track date and status
 
 ### Change orders
+
 - Create change records
 - Track summary, impact, and status
 - Link to project elements
 
 ### AI workflows
+
 - Generate draft scope from intake
 - Compare quotes against scope
 - Generate progress summaries from notes and records
 - Require user review before material changes become official
 
 ### Export
+
 - Generate PDF summary
 - Produce clean print-friendly output
 
@@ -336,6 +374,7 @@ Core MVP entities:
 ## 15. Success Metrics
 
 ### Product metrics
+
 1. project creation completion rate
 2. intake completion rate
 3. scope draft generation rate
@@ -346,6 +385,7 @@ Core MVP entities:
 8. retention after first project setup
 
 ### User value metrics
+
 1. time from new project to first structured scope
 2. number of decisions captured per active project
 3. number of changes tracked per active project
@@ -353,6 +393,7 @@ Core MVP entities:
 5. repeat use across multiple projects
 
 ### Business learning metrics
+
 1. number of beta users onboarded
 2. number of homeowner users vs pro users
 3. willingness to pay by segment
@@ -362,21 +403,25 @@ Core MVP entities:
 ## 16. Risks
 
 ### Product risks
+
 - trying to serve homeowners and pros equally at launch
 - building too broad too early
 - adding too much workflow before proving core value
 
 ### UX risks
+
 - intake feels long or bureaucratic
 - scope builder feels too rigid
 - budget planner feels too shallow for pros and too complex for homeowners
 
 ### Engineering risks
+
 - file handling and export add hidden complexity
 - AI outputs become messy without structure
 - data model becomes too heavy before workflow is proven
 
 ### Business risks
+
 - unclear wedge
 - weak willingness to pay
 - slow onboarding if value is not visible in the first session
@@ -384,6 +429,7 @@ Core MVP entities:
 ## 17. MVP Release Phases
 
 ### Phase 1, Core planning loop
+
 - project creation
 - intake
 - AI scope draft
@@ -391,12 +437,14 @@ Core MVP entities:
 - project summary view
 
 ### Phase 2, Control layer
+
 - budget planner
 - schedule planner
 - decision log
 - change orders
 
 ### Phase 3, Evidence and output
+
 - documents
 - photos
 - PDF export
