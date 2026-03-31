@@ -1,9 +1,9 @@
-import { AppShell } from "@/components/layout/app-shell";
 import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default function ProjectBudgetPage() {
   return (
-    <AppShell>
+    <PageContainer>
       <FeaturePlaceholder
         eyebrow="Budget"
         title="Budget planner"
@@ -14,6 +14,6 @@ export default function ProjectBudgetPage() {
           "Avoid spreadsheet-style sprawl in page files.",
         ]}
       />
-    </AppShell>
+    </PageContainer>
   );
 }

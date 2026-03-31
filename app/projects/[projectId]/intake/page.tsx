@@ -1,9 +1,9 @@
-import { AppShell } from "@/components/layout/app-shell";
 import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default function ProjectIntakePage() {
   return (
-    <AppShell>
+    <PageContainer>
       <FeaturePlaceholder
         eyebrow="Intake"
         title="Guided renovation intake"
@@ -14,6 +14,6 @@ export default function ProjectIntakePage() {
           "Feed reviewed intake data into AI scope drafting.",
         ]}
       />
-    </AppShell>
+    </PageContainer>
   );
 }

@@ -1,9 +1,9 @@
-import { AppShell } from "@/components/layout/app-shell";
 import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default function ProjectScopePage() {
   return (
-    <AppShell>
+    <PageContainer>
       <FeaturePlaceholder
         eyebrow="Scope"
         title="Scope builder"
@@ -14,6 +14,6 @@ export default function ProjectScopePage() {
           "Design for export and quote comparison from day one.",
         ]}
       />
-    </AppShell>
+    </PageContainer>
   );
 }

@@ -1,9 +1,9 @@
-import { AppShell } from "@/components/layout/app-shell";
 import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default function ProjectWorkspacePage() {
   return (
-    <AppShell>
+    <PageContainer>
       <FeaturePlaceholder
         eyebrow="Project"
         title="Project overview"
@@ -14,6 +14,6 @@ export default function ProjectWorkspacePage() {
           "Prefer exportable project state over dashboard noise.",
         ]}
       />
-    </AppShell>
+    </PageContainer>
   );
 }

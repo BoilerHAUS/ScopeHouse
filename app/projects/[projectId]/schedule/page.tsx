@@ -1,9 +1,9 @@
-import { AppShell } from "@/components/layout/app-shell";
 import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default function ProjectSchedulePage() {
   return (
-    <AppShell>
+    <PageContainer>
       <FeaturePlaceholder
         eyebrow="Schedule"
         title="Schedule planner"
@@ -14,6 +14,6 @@ export default function ProjectSchedulePage() {
           "Keep schedule rules in features/schedule, not in route components.",
         ]}
       />
-    </AppShell>
+    </PageContainer>
   );
 }

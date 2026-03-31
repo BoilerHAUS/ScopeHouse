@@ -1,9 +1,9 @@
-import { AppShell } from "@/components/layout/app-shell";
 import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default function ProjectExportPage() {
   return (
-    <AppShell>
+    <PageContainer>
       <FeaturePlaceholder
         eyebrow="Export"
         title="Project export"
@@ -14,6 +14,6 @@ export default function ProjectExportPage() {
           "Compose export inputs from feature queries, not page-level glue code.",
         ]}
       />
-    </AppShell>
+    </PageContainer>
   );
 }

@@ -1,9 +1,9 @@
-import { AppShell } from "@/components/layout/app-shell";
 import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default function ProjectDecisionsPage() {
   return (
-    <AppShell>
+    <PageContainer>
       <FeaturePlaceholder
         eyebrow="Decisions"
         title="Decision log"
@@ -14,6 +14,6 @@ export default function ProjectDecisionsPage() {
           "Connect changes back to project scope and budget context.",
         ]}
       />
-    </AppShell>
+    </PageContainer>
   );
 }

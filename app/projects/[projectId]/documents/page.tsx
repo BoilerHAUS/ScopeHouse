@@ -1,9 +1,9 @@
-import { AppShell } from "@/components/layout/app-shell";
 import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { PageContainer } from "@/components/layout/page-container";
 
 export default function ProjectDocumentsPage() {
   return (
-    <AppShell>
+    <PageContainer>
       <FeaturePlaceholder
         eyebrow="Documents"
         title="Document vault"
@@ -14,6 +14,6 @@ export default function ProjectDocumentsPage() {
           "Keep file access and permissions out of client-only code.",
         ]}
       />
-    </AppShell>
+    </PageContainer>
   );
 }
