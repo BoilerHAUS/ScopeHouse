@@ -1,6 +1,7 @@
 import { config as loadEnv } from "dotenv";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, WorkspaceRole } from "@prisma/client";
+import { hash } from "bcryptjs";
 
 loadEnv();
 loadEnv({ path: ".env.local", override: true });
@@ -15,16 +16,20 @@ const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  const passwordHash = await hash("scopehouse-demo", 12);
+
   const user = await prisma.user.upsert({
     where: {
       email: "owner@scopehouse.local",
     },
     update: {
       name: "ScopeHouse Owner",
+      passwordHash,
     },
     create: {
       email: "owner@scopehouse.local",
       name: "ScopeHouse Owner",
+      passwordHash,
     },
   });
 
