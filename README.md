@@ -45,8 +45,11 @@ It helps users plan, price, run, track, and finish renovation projects with one 
 
 1. Install dependencies with `npm install`.
 2. Copy `.env.example` values into `.env.local`.
-3. Start the dev server with `npm run dev`.
-4. Open `http://localhost:3000`.
+3. Start local Postgres with `npm run db:start`.
+4. Run the first migration with `npm run db:migrate -- --name init`.
+5. Seed local data with `npm run db:seed`.
+6. Start the dev server with `npm run dev`.
+7. Open `http://localhost:3000`.
 
 ## Development Rules
 
@@ -56,6 +59,15 @@ It helps users plan, price, run, track, and finish renovation projects with one 
 - Keep server-only code out of client hooks and components.
 - Keep AI outputs structured, reviewable, and human-approved before writeback.
 - Keep planning docs current as the product sharpens.
+
+## Database Workflow
+
+- Prisma schema lives at `db/schema/schema.prisma`.
+- Migrations live in `db/migrations`.
+- Seed entry point is `db/seed.ts`.
+- Prisma CLI config lives in `prisma.config.ts`.
+- Local PostgreSQL runs through `docker-compose` on `localhost:5434`.
+- Use `npm run db:migrate -- --name <migration_name>` for schema changes.
 
 ## Core Docs
 

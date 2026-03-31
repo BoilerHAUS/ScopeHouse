@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: scopehouse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: scopehouse
+      POSTGRES_USER: scopehouse
+      POSTGRES_PASSWORD: scopehouse
+    ports:
+      - "5434:5432"
+    volumes:
+      - scopehouse_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scopehouse -d scopehouse"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  scopehouse_postgres_data:
