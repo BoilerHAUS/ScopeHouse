@@ -19,18 +19,21 @@
               "required": ["name", "items"],
               "properties": {
                 "name": { "type": "string" },
-                "items": {
-                  "type": "array",
                   "items": {
-                    "type": "object",
-                    "required": ["label", "status"],
-                    "properties": {
-                      "label": { "type": "string" },
-                      "status": { "type": "string" },
-                      "notes": { "type": "string" }
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["label", "status"],
+                      "properties": {
+                        "label": { "type": "string" },
+                        "status": {
+                          "type": "string",
+                          "enum": ["included", "needs_info", "optional"]
+                        },
+                        "notes": { "type": "string" }
+                      }
                     }
                   }
-                }
               }
             }
           }

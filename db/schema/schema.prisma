@@ -44,6 +44,37 @@ enum ActivityEventType {
   intake_started
   intake_saved
   intake_completed
+  scope_draft_generated
+  scope_draft_applied
+}
+
+enum ScopeItemStatus {
+  draft
+  active
+  needs_info
+}
+
+enum ScopeItemSource {
+  manual
+  ai_draft
+}
+
+enum ScopeDraftStatus {
+  pending_review
+  applied
+  discarded
+}
+
+enum AiWorkflow {
+  scope_draft
+  quote_compare
+  progress_summary
+}
+
+enum AiGenerationStatus {
+  running
+  completed
+  failed
 }
 
 model User {
@@ -98,7 +129,10 @@ model Project {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   activityLogs  ActivityLog[]
+  aiGenerations AiGeneration[]
   intake        ProjectIntake?
+  scopeDrafts   ScopeDraft[]
+  scopeItems    ScopeItem[]
   createdBy     User           @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
   workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -145,6 +179,71 @@ model ActivityLog {
   @@index([workspaceId, createdAt])
   @@index([actorId])
   @@index([eventType])
+}
+
+model ScopeDraft {
+  id             String           @id @default(cuid())
+  projectId      String
+  generationId   String?          @unique
+  projectSummary String
+  phases         Json
+  assumptions    Json?
+  risks          Json?
+  status         ScopeDraftStatus @default(pending_review)
+  appliedAt      DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  generation     AiGeneration?    @relation(fields: [generationId], references: [id], onDelete: SetNull)
+  project        Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scopeItems     ScopeItem[]
+
+  @@index([projectId, createdAt])
+  @@index([status])
+}
+
+model ScopeItem {
+  id                String          @id @default(cuid())
+  projectId         String
+  appliedFromDraftId String?
+  phaseName         String
+  phaseOrder        Int
+  areaName          String
+  areaOrder         Int
+  itemOrder         Int
+  label             String
+  notes             String?
+  status            ScopeItemStatus @default(draft)
+  source            ScopeItemSource @default(manual)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  appliedFromDraft  ScopeDraft?     @relation(fields: [appliedFromDraftId], references: [id], onDelete: SetNull)
+  project           Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, phaseOrder, areaOrder, itemOrder])
+  @@index([appliedFromDraftId])
+  @@index([status])
+}
+
+model AiGeneration {
+  id            String             @id @default(cuid())
+  projectId     String?
+  workflow      AiWorkflow
+  status        AiGenerationStatus @default(running)
+  model         String
+  promptVersion String
+  requestPayload Json?
+  responsePayload Json?
+  outputObject  Json?
+  errorMessage  String?
+  completedAt   DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  project       Project?           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scopeDraft    ScopeDraft?
+
+  @@index([projectId, createdAt])
+  @@index([workflow, createdAt])
+  @@index([status])
 }
 
 model Session {

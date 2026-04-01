@@ -51,6 +51,11 @@ It helps users plan, price, run, track, and finish renovation projects with one 
 6. Start the dev server with `npm run dev`.
 7. Open `http://localhost:3000`.
 
+For AI scope drafting, also set:
+
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL` default is `gpt-5-mini`
+
 ## Development Rules
 
 - Keep `app/` files thin.

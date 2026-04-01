@@ -7,5 +7,6 @@ Primary engineering source docs:
 - `architecture.md`
 - `data-model.md`
 - `activity-log.md`
+- `ai-workflows.md`
 
 Use this folder for implementation rules, architecture notes, and future ADR-adjacent engineering guidance.

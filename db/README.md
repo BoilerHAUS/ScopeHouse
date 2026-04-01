@@ -31,6 +31,9 @@ The initial schema is intentionally narrow:
 - `Project`
 - `ProjectIntake`
 - `ActivityLog`
+- `ScopeDraft`
+- `ScopeItem`
+- `AiGeneration`
 
 The project model now includes:
 
@@ -45,3 +48,9 @@ The intake and activity foundation now add:
 - one-to-one guided intake persistence
 - lightweight project activity events
 - event metadata for future summaries and reporting
+
+The scope and AI foundation now add:
+
+- grouped scope items with explicit ordering
+- reviewable AI scope drafts before writeback
+- AI generation logs with prompt version and model metadata

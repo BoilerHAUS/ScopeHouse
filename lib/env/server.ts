@@ -15,4 +15,7 @@ export const serverEnv = {
   get openAiApiKey() {
     return getRequiredEnv("OPENAI_API_KEY");
   },
+  get openAiModel() {
+    return process.env.OPENAI_MODEL || "gpt-5-mini";
+  },
 };

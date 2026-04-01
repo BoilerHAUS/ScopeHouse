@@ -80,6 +80,9 @@ Relations:
 - belongs to one creator `User`
 - has zero or one `ProjectIntake`
 - has many `ActivityLog` entries
+- has many `ScopeDraft`
+- has many `ScopeItem`
+- has many `AiGeneration`
 
 Indexes:
 
@@ -182,3 +185,77 @@ Event types:
 - `intake_started`
 - `intake_saved`
 - `intake_completed`
+- `scope_draft_generated`
+- `scope_draft_applied`
+
+### ScopeDraft
+
+Purpose:
+
+- stores a reviewable AI-generated draft before it becomes the live scope baseline
+
+Key fields:
+
+- `projectId`
+- `generationId`
+- `projectSummary`
+- `phases`
+- `assumptions`
+- `risks`
+- `status`
+- `appliedAt`
+- `createdAt`
+- `updatedAt`
+
+Notes:
+
+- draft content is stored as structured JSON for fast review rendering
+- only explicit user confirmation should move a draft into live scope items
+
+### ScopeItem
+
+Purpose:
+
+- stores the live scope baseline used by later budget, quote, and export flows
+
+Key fields:
+
+- `projectId`
+- `appliedFromDraftId`
+- `phaseName`
+- `phaseOrder`
+- `areaName`
+- `areaOrder`
+- `itemOrder`
+- `label`
+- `notes`
+- `status`
+- `source`
+- `createdAt`
+- `updatedAt`
+
+Notes:
+
+- the MVP model is intentionally flat and grouped by phase and area
+- ordering is explicit and does not require a recursive tree model
+
+### AiGeneration
+
+Purpose:
+
+- logs structured AI workflow executions and their metadata
+
+Key fields:
+
+- `projectId`
+- `workflow`
+- `status`
+- `model`
+- `promptVersion`
+- `requestPayload`
+- `responsePayload`
+- `outputObject`
+- `errorMessage`
+- `completedAt`
+- `createdAt`
+- `updatedAt`
