@@ -9,13 +9,41 @@ import {
   type ScheduleMilestoneFormActionState,
 } from "@/features/schedule/schemas/schedule-milestone-form";
 
+type SaveScheduleMilestoneActionDependencies = {
+  db: typeof db;
+  requireCurrentUser: typeof requireCurrentUser;
+  getProjectForUser: typeof getProjectForUser;
+  revalidatePath: typeof revalidatePath;
+};
+
+const saveScheduleMilestoneActionDependencies: SaveScheduleMilestoneActionDependencies = {
+  db,
+  requireCurrentUser,
+  getProjectForUser,
+  revalidatePath,
+};
+
 export async function saveScheduleMilestoneAction(
+  projectId: string,
+  previousState: ScheduleMilestoneFormActionState,
+  formData: FormData,
+): Promise<ScheduleMilestoneFormActionState> {
+  return saveScheduleMilestoneActionWithDependencies(
+    saveScheduleMilestoneActionDependencies,
+    projectId,
+    previousState,
+    formData,
+  );
+}
+
+export async function saveScheduleMilestoneActionWithDependencies(
+  dependencies: SaveScheduleMilestoneActionDependencies,
   projectId: string,
   _previousState: ScheduleMilestoneFormActionState,
   formData: FormData,
 ): Promise<ScheduleMilestoneFormActionState> {
-  const user = await requireCurrentUser();
-  const project = await getProjectForUser(projectId, user.id);
+  const user = await dependencies.requireCurrentUser();
+  const project = await dependencies.getProjectForUser(projectId, user.id);
 
   if (!project) {
     return {
@@ -44,7 +72,7 @@ export async function saveScheduleMilestoneAction(
     };
   }
 
-  const phase = await db.schedulePhase.findFirst({
+  const phase = await dependencies.db.schedulePhase.findFirst({
     where: {
       id: result.data.phaseId,
       projectId,
@@ -63,7 +91,7 @@ export async function saveScheduleMilestoneAction(
   const milestoneId = result.data.milestoneId?.trim();
 
   if (milestoneId) {
-    const existingMilestone = await db.scheduleMilestone.findFirst({
+    const existingMilestone = await dependencies.db.scheduleMilestone.findFirst({
       where: {
         id: milestoneId,
         projectId,
@@ -79,7 +107,7 @@ export async function saveScheduleMilestoneAction(
       };
     }
 
-    await db.scheduleMilestone.update({
+    await dependencies.db.scheduleMilestone.update({
       where: {
         id: milestoneId,
       },
@@ -91,7 +119,7 @@ export async function saveScheduleMilestoneAction(
       },
     });
   } else {
-    const lastMilestone = await db.scheduleMilestone.findFirst({
+    const lastMilestone = await dependencies.db.scheduleMilestone.findFirst({
       where: {
         projectId,
         phaseId: result.data.phaseId,
@@ -104,7 +132,7 @@ export async function saveScheduleMilestoneAction(
       },
     });
 
-    await db.scheduleMilestone.create({
+    await dependencies.db.scheduleMilestone.create({
       data: {
         projectId,
         phaseId: result.data.phaseId,
@@ -116,8 +144,8 @@ export async function saveScheduleMilestoneAction(
     });
   }
 
-  revalidatePath(`/projects/${projectId}`);
-  revalidatePath(`/projects/${projectId}/schedule`);
+  dependencies.revalidatePath(`/projects/${projectId}`);
+  dependencies.revalidatePath(`/projects/${projectId}/schedule`);
 
   return {
     success: milestoneId ? "Milestone updated." : "Milestone created.",

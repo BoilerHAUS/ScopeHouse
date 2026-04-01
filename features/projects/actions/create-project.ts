@@ -10,12 +10,40 @@ import {
   type CreateProjectActionState,
 } from "@/features/projects/schemas/create-project";
 
+type CreateProjectActionDependencies = {
+  db: typeof db;
+  requireCurrentUser: typeof requireCurrentUser;
+  getDefaultWorkspaceIdForUser: typeof getDefaultWorkspaceIdForUser;
+  logProjectActivity: typeof logProjectActivity;
+  redirect: typeof redirect;
+};
+
+const createProjectActionDependencies: CreateProjectActionDependencies = {
+  db,
+  requireCurrentUser,
+  getDefaultWorkspaceIdForUser,
+  logProjectActivity,
+  redirect,
+};
+
 export async function createProjectAction(
+  previousState: CreateProjectActionState,
+  formData: FormData,
+): Promise<CreateProjectActionState> {
+  return createProjectActionWithDependencies(
+    createProjectActionDependencies,
+    previousState,
+    formData,
+  );
+}
+
+export async function createProjectActionWithDependencies(
+  dependencies: CreateProjectActionDependencies,
   _previousState: CreateProjectActionState,
   formData: FormData,
 ): Promise<CreateProjectActionState> {
-  const user = await requireCurrentUser();
-  const workspaceId = await getDefaultWorkspaceIdForUser(user.id);
+  const user = await dependencies.requireCurrentUser();
+  const workspaceId = await dependencies.getDefaultWorkspaceIdForUser(user.id);
 
   if (!workspaceId) {
     return {
@@ -44,7 +72,7 @@ export async function createProjectAction(
     };
   }
 
-  const project = await db.project.create({
+  const project = await dependencies.db.project.create({
     data: {
       workspaceId,
       createdById: user.id,
@@ -60,7 +88,7 @@ export async function createProjectAction(
     },
   });
 
-  await logProjectActivity({
+  await dependencies.logProjectActivity({
     projectId: project.id,
     workspaceId: project.workspaceId,
     actorId: user.id,
@@ -71,5 +99,5 @@ export async function createProjectAction(
     },
   });
 
-  redirect(`/projects/${project.id}`);
+  dependencies.redirect(`/projects/${project.id}`);
 }

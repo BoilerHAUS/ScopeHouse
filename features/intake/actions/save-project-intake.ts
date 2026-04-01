@@ -11,6 +11,22 @@ import {
   type SaveProjectIntakeActionState,
 } from "@/features/intake/schemas/project-intake";
 
+type SaveProjectIntakeActionDependencies = {
+  db: typeof db;
+  requireCurrentUser: typeof requireCurrentUser;
+  getProjectForUser: typeof getProjectForUser;
+  revalidatePath: typeof revalidatePath;
+  redirect: typeof redirect;
+};
+
+const saveProjectIntakeActionDependencies: SaveProjectIntakeActionDependencies = {
+  db,
+  requireCurrentUser,
+  getProjectForUser,
+  revalidatePath,
+  redirect,
+};
+
 function isComplete(values: {
   renovationType: string | null | undefined;
   rooms: string[];
@@ -35,11 +51,25 @@ function isComplete(values: {
 
 export async function saveProjectIntakeAction(
   projectId: string,
+  previousState: SaveProjectIntakeActionState,
+  formData: FormData,
+): Promise<SaveProjectIntakeActionState> {
+  return saveProjectIntakeActionWithDependencies(
+    saveProjectIntakeActionDependencies,
+    projectId,
+    previousState,
+    formData,
+  );
+}
+
+export async function saveProjectIntakeActionWithDependencies(
+  dependencies: SaveProjectIntakeActionDependencies,
+  projectId: string,
   _previousState: SaveProjectIntakeActionState,
   formData: FormData,
 ): Promise<SaveProjectIntakeActionState> {
-  const user = await requireCurrentUser();
-  const project = await getProjectForUser(projectId, user.id);
+  const user = await dependencies.requireCurrentUser();
+  const project = await dependencies.getProjectForUser(projectId, user.id);
 
   if (!project) {
     return {
@@ -105,7 +135,7 @@ export async function saveProjectIntakeAction(
     };
   }
 
-  const existingIntake = await db.projectIntake.findUnique({
+  const existingIntake = await dependencies.db.projectIntake.findUnique({
     where: {
       projectId,
     },
@@ -115,7 +145,7 @@ export async function saveProjectIntakeAction(
     },
   });
 
-  await db.$transaction(async (tx) => {
+  await dependencies.db.$transaction(async (tx) => {
     await tx.projectIntake.upsert({
       where: {
         projectId,
@@ -195,13 +225,13 @@ export async function saveProjectIntakeAction(
     });
   });
 
-  revalidatePath("/projects");
-  revalidatePath(`/projects/${projectId}`);
-  revalidatePath(`/projects/${projectId}/intake`);
-  revalidatePath(`/projects/${projectId}/scope`);
+  dependencies.revalidatePath("/projects");
+  dependencies.revalidatePath(`/projects/${projectId}`);
+  dependencies.revalidatePath(`/projects/${projectId}/intake`);
+  dependencies.revalidatePath(`/projects/${projectId}/scope`);
 
   if (result.data.intent === "complete" && nextCompletedAt) {
-    redirect(`/projects/${projectId}/scope`);
+    dependencies.redirect(`/projects/${projectId}/scope`);
   }
 
   return {

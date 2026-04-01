@@ -9,13 +9,41 @@ import {
   type BudgetLineActionState,
 } from "@/features/budget/schemas/budget-line-form";
 
+type SaveBudgetLineActionDependencies = {
+  db: typeof db;
+  requireCurrentUser: typeof requireCurrentUser;
+  getProjectForUser: typeof getProjectForUser;
+  revalidatePath: typeof revalidatePath;
+};
+
+const saveBudgetLineActionDependencies: SaveBudgetLineActionDependencies = {
+  db,
+  requireCurrentUser,
+  getProjectForUser,
+  revalidatePath,
+};
+
 export async function saveBudgetLineAction(
+  projectId: string,
+  previousState: BudgetLineActionState,
+  formData: FormData,
+): Promise<BudgetLineActionState> {
+  return saveBudgetLineActionWithDependencies(
+    saveBudgetLineActionDependencies,
+    projectId,
+    previousState,
+    formData,
+  );
+}
+
+export async function saveBudgetLineActionWithDependencies(
+  dependencies: SaveBudgetLineActionDependencies,
   projectId: string,
   _previousState: BudgetLineActionState,
   formData: FormData,
 ): Promise<BudgetLineActionState> {
-  const user = await requireCurrentUser();
-  const project = await getProjectForUser(projectId, user.id);
+  const user = await dependencies.requireCurrentUser();
+  const project = await dependencies.getProjectForUser(projectId, user.id);
 
   if (!project) {
     return { error: "Project not found." };
@@ -51,7 +79,7 @@ export async function saveBudgetLineAction(
     };
   }
 
-  const category = await db.budgetCategory.findFirst({
+  const category = await dependencies.db.budgetCategory.findFirst({
     where: {
       id: result.data.categoryId,
       projectId,
@@ -70,7 +98,7 @@ export async function saveBudgetLineAction(
   const lineId = result.data.lineId?.trim();
 
   if (lineId) {
-    const existingLine = await db.budgetLine.findFirst({
+    const existingLine = await dependencies.db.budgetLine.findFirst({
       where: {
         id: lineId,
         projectId,
@@ -84,7 +112,7 @@ export async function saveBudgetLineAction(
       return { error: "Budget line not found." };
     }
 
-    await db.budgetLine.update({
+    await dependencies.db.budgetLine.update({
       where: {
         id: lineId,
       },
@@ -100,7 +128,7 @@ export async function saveBudgetLineAction(
       },
     });
   } else {
-    const lastLine = await db.budgetLine.findFirst({
+    const lastLine = await dependencies.db.budgetLine.findFirst({
       where: {
         projectId,
         categoryId: result.data.categoryId,
@@ -113,7 +141,7 @@ export async function saveBudgetLineAction(
       },
     });
 
-    await db.budgetLine.create({
+    await dependencies.db.budgetLine.create({
       data: {
         projectId,
         categoryId: result.data.categoryId,
@@ -129,8 +157,8 @@ export async function saveBudgetLineAction(
     });
   }
 
-  revalidatePath(`/projects/${projectId}`);
-  revalidatePath(`/projects/${projectId}/budget`);
+  dependencies.revalidatePath(`/projects/${projectId}`);
+  dependencies.revalidatePath(`/projects/${projectId}/budget`);
 
   return {
     success: lineId ? "Line updated." : "Line created.",

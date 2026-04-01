@@ -9,13 +9,41 @@ import {
   type ChangeOrderFormActionState,
 } from "@/features/change-orders/schemas/change-order-form";
 
+type SaveChangeOrderActionDependencies = {
+  db: typeof db;
+  requireCurrentUser: typeof requireCurrentUser;
+  getProjectForUser: typeof getProjectForUser;
+  revalidatePath: typeof revalidatePath;
+};
+
+const saveChangeOrderActionDependencies: SaveChangeOrderActionDependencies = {
+  db,
+  requireCurrentUser,
+  getProjectForUser,
+  revalidatePath,
+};
+
 export async function saveChangeOrderAction(
+  projectId: string,
+  previousState: ChangeOrderFormActionState,
+  formData: FormData,
+): Promise<ChangeOrderFormActionState> {
+  return saveChangeOrderActionWithDependencies(
+    saveChangeOrderActionDependencies,
+    projectId,
+    previousState,
+    formData,
+  );
+}
+
+export async function saveChangeOrderActionWithDependencies(
+  dependencies: SaveChangeOrderActionDependencies,
   projectId: string,
   _previousState: ChangeOrderFormActionState,
   formData: FormData,
 ): Promise<ChangeOrderFormActionState> {
-  const user = await requireCurrentUser();
-  const project = await getProjectForUser(projectId, user.id);
+  const user = await dependencies.requireCurrentUser();
+  const project = await dependencies.getProjectForUser(projectId, user.id);
 
   if (!project) {
     return { error: "Project not found." };
@@ -54,7 +82,7 @@ export async function saveChangeOrderAction(
   const changeOrderId = result.data.changeOrderId?.trim();
 
   if (changeOrderId) {
-    const existing = await db.changeOrder.findFirst({
+    const existing = await dependencies.db.changeOrder.findFirst({
       where: {
         id: changeOrderId,
         projectId,
@@ -66,7 +94,7 @@ export async function saveChangeOrderAction(
       return { error: "Change order not found." };
     }
 
-    await db.changeOrder.update({
+    await dependencies.db.changeOrder.update({
       where: { id: changeOrderId },
       data: {
         title: result.data.title,
@@ -80,7 +108,7 @@ export async function saveChangeOrderAction(
       },
     });
   } else {
-    await db.changeOrder.create({
+    await dependencies.db.changeOrder.create({
       data: {
         projectId,
         title: result.data.title,
@@ -95,9 +123,9 @@ export async function saveChangeOrderAction(
     });
   }
 
-  revalidatePath(`/projects/${projectId}`);
-  revalidatePath(`/projects/${projectId}/change-orders`);
-  revalidatePath(`/projects/${projectId}/export`);
+  dependencies.revalidatePath(`/projects/${projectId}`);
+  dependencies.revalidatePath(`/projects/${projectId}/change-orders`);
+  dependencies.revalidatePath(`/projects/${projectId}/export`);
 
   return {
     success: changeOrderId ? "Change order updated." : "Change order created.",
