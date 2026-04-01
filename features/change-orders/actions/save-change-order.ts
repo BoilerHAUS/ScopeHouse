@@ -61,6 +61,9 @@ export async function saveChangeOrderActionWithDependencies(
     impactSummary: formData.get("impactSummary"),
     budgetReference: formData.get("budgetReference"),
     scheduleReference: formData.get("scheduleReference"),
+    scopeItemId: formData.get("scopeItemId") || undefined,
+    budgetLineId: formData.get("budgetLineId") || undefined,
+    scheduleMilestoneId: formData.get("scheduleMilestoneId") || undefined,
     notes: formData.get("notes"),
   });
 
@@ -77,6 +80,9 @@ export async function saveChangeOrderActionWithDependencies(
         impactSummary: fieldErrors.impactSummary?.[0],
         budgetReference: fieldErrors.budgetReference?.[0],
         scheduleReference: fieldErrors.scheduleReference?.[0],
+        scopeItemId: fieldErrors.scopeItemId?.[0],
+        budgetLineId: fieldErrors.budgetLineId?.[0],
+        scheduleMilestoneId: fieldErrors.scheduleMilestoneId?.[0],
         notes: fieldErrors.notes?.[0],
       },
     };
@@ -108,6 +114,9 @@ export async function saveChangeOrderActionWithDependencies(
         impactSummary: result.data.impactSummary,
         budgetReference: result.data.budgetReference,
         scheduleReference: result.data.scheduleReference,
+        scopeItemId: result.data.scopeItemId,
+        budgetLineId: result.data.budgetLineId,
+        scheduleMilestoneId: result.data.scheduleMilestoneId,
         notes: result.data.notes,
       },
       select: {
@@ -127,6 +136,9 @@ export async function saveChangeOrderActionWithDependencies(
         impactSummary: result.data.impactSummary,
         budgetReference: result.data.budgetReference,
         scheduleReference: result.data.scheduleReference,
+        scopeItemId: result.data.scopeItemId,
+        budgetLineId: result.data.budgetLineId,
+        scheduleMilestoneId: result.data.scheduleMilestoneId,
         notes: result.data.notes,
       },
       select: {

@@ -254,6 +254,27 @@ export function ProjectSummaryPdfDocument({
         </View>
 
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Budget summary</Text>
+          {summary.budget && summary.budget.categories.length > 0 ? (
+            summary.budget.categories.map((category) => (
+              <View key={category.id} style={styles.block}>
+                <Text style={{ ...styles.body, fontWeight: 700 }}>{category.label}</Text>
+                {category.lines.map((line) => (
+                  <Text key={line.id} style={styles.listItem}>
+                    • {line.label}
+                    {line.scopeItem
+                      ? ` (${line.scopeItem.phaseName} / ${line.scopeItem.areaName} / ${line.scopeItem.label})`
+                      : ""}
+                  </Text>
+                ))}
+              </View>
+            ))
+          ) : (
+            <Text style={styles.body}>No budget categories have been added yet.</Text>
+          )}
+        </View>
+
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Decision log</Text>
           {decisions.length > 0 ? (
             decisions.map((decision) => (
@@ -288,12 +309,27 @@ export function ProjectSummaryPdfDocument({
                 </Text>
                 {changeOrder.budgetReference ? (
                   <Text style={styles.body}>
-                    Budget: {changeOrder.budgetReference}
+                    Budget ref: {changeOrder.budgetReference}
                   </Text>
                 ) : null}
                 {changeOrder.scheduleReference ? (
                   <Text style={styles.body}>
-                    Schedule: {changeOrder.scheduleReference}
+                    Schedule ref: {changeOrder.scheduleReference}
+                  </Text>
+                ) : null}
+                {changeOrder.scopeItem ? (
+                  <Text style={styles.body}>
+                    Scope: {changeOrder.scopeItem.phaseName} / {changeOrder.scopeItem.areaName} / {changeOrder.scopeItem.label}
+                  </Text>
+                ) : null}
+                {changeOrder.budgetLine ? (
+                  <Text style={styles.body}>
+                    Budget line: {changeOrder.budgetLine.category.label} / {changeOrder.budgetLine.label}
+                  </Text>
+                ) : null}
+                {changeOrder.scheduleMilestone ? (
+                  <Text style={styles.body}>
+                    Milestone: {changeOrder.scheduleMilestone.phase.name} / {changeOrder.scheduleMilestone.label}
                   </Text>
                 ) : null}
               </View>

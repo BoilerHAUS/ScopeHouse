@@ -55,6 +55,7 @@ export async function saveBudgetLineActionWithDependencies(
   const result = budgetLineFormSchema.safeParse({
     lineId: formData.get("lineId") || undefined,
     categoryId: formData.get("categoryId"),
+    scopeItemId: formData.get("scopeItemId") || undefined,
     label: formData.get("label"),
     estimate: formData.get("estimate"),
     allowance: formData.get("allowance"),
@@ -123,6 +124,7 @@ export async function saveBudgetLineActionWithDependencies(
       },
       data: {
         categoryId: result.data.categoryId,
+        scopeItemId: result.data.scopeItemId,
         label: result.data.label,
         estimateCents: result.data.estimate,
         allowanceCents: result.data.allowance,
@@ -155,6 +157,7 @@ export async function saveBudgetLineActionWithDependencies(
       data: {
         projectId,
         categoryId: result.data.categoryId,
+        scopeItemId: result.data.scopeItemId,
         label: result.data.label,
         estimateCents: result.data.estimate,
         allowanceCents: result.data.allowance,

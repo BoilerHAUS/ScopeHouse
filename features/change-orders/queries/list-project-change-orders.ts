@@ -30,9 +30,38 @@ export const listProjectChangeOrdersForUser = cache(
             impactSummary: true,
             budgetReference: true,
             scheduleReference: true,
+            scopeItemId: true,
+            budgetLineId: true,
+            scheduleMilestoneId: true,
             notes: true,
             createdAt: true,
             updatedAt: true,
+            scopeItem: {
+              select: {
+                id: true,
+                label: true,
+                phaseName: true,
+                areaName: true,
+              },
+            },
+            budgetLine: {
+              select: {
+                id: true,
+                label: true,
+                category: {
+                  select: { label: true },
+                },
+              },
+            },
+            scheduleMilestone: {
+              select: {
+                id: true,
+                label: true,
+                phase: {
+                  select: { name: true },
+                },
+              },
+            },
           },
         },
       },

@@ -8,36 +8,54 @@ import {
   CHANGE_ORDER_STATUS_OPTIONS,
   type ChangeOrderFormActionState,
 } from "@/features/change-orders/schemas/change-order-form";
+import type { listProjectChangeOrdersForUser } from "@/features/change-orders/queries/list-project-change-orders";
+import type { getProjectBudgetForUser } from "@/features/budget/queries/get-project-budget";
+import type { getProjectScheduleForUser } from "@/features/schedule/queries/get-project-schedule";
+import type { getProjectScopeForUser } from "@/features/scope/queries/get-project-scope";
 
-const initialState: ChangeOrderFormActionState = {};
+type ChangeOrder = NonNullable<
+  Awaited<ReturnType<typeof listProjectChangeOrdersForUser>>
+>[number];
+
+type ScopeTree = Awaited<ReturnType<typeof getProjectScopeForUser>>;
+type BudgetCategories = NonNullable<
+  Awaited<ReturnType<typeof getProjectBudgetForUser>>
+>["categories"];
+type SchedulePhases = NonNullable<
+  Awaited<ReturnType<typeof getProjectScheduleForUser>>
+>["phases"];
 
 type ChangeOrderManagerProps = {
   projectId: string;
-  changeOrders: Array<{
-    id: string;
-    projectId: string;
-    title: string;
-    description: string;
-    status: string;
-    requestedAt: Date;
-    impactSummary: string;
-    budgetReference: string | null;
-    scheduleReference: string | null;
-    notes: string | null;
-  }>;
+  changeOrders: ChangeOrder[];
+  scopeTree: ScopeTree;
+  budgetCategories: BudgetCategories;
+  schedulePhases: SchedulePhases;
 };
+
+const initialState: ChangeOrderFormActionState = {};
 
 function ChangeOrderForm({
   projectId,
   changeOrder,
+  scopeTree,
+  budgetCategories,
+  schedulePhases,
 }: {
   projectId: string;
-  changeOrder?: ChangeOrderManagerProps["changeOrders"][number];
+  changeOrder?: ChangeOrder;
+  scopeTree: ScopeTree;
+  budgetCategories: BudgetCategories;
+  schedulePhases: SchedulePhases;
 }) {
   const [state, formAction, pending] = useActionState(
     saveChangeOrderAction.bind(null, projectId),
     initialState,
   );
+
+  const hasScopeItems = scopeTree.length > 0;
+  const hasBudgetLines = budgetCategories.some((c) => c.lines.length > 0);
+  const hasMilestones = schedulePhases.some((p) => p.milestones.length > 0);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -145,6 +163,72 @@ function ChangeOrderForm({
         </label>
       </div>
 
+      {hasScopeItems || hasBudgetLines || hasMilestones ? (
+        <div className="grid gap-4 lg:grid-cols-3">
+          {hasScopeItems ? (
+            <label className="block space-y-2">
+              <span className="text-sm font-medium">Linked scope item</span>
+              <select
+                name="scopeItemId"
+                defaultValue={changeOrder?.scopeItemId ?? ""}
+                className="border-border bg-background focus:border-primary w-full rounded-2xl border px-4 py-3 outline-none"
+              >
+                <option value="">— None —</option>
+                {scopeTree.map((phase) =>
+                  phase.areas.map((area) =>
+                    area.items.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {phase.phaseName} / {area.areaName} / {item.label}
+                      </option>
+                    )),
+                  ),
+                )}
+              </select>
+            </label>
+          ) : null}
+
+          {hasBudgetLines ? (
+            <label className="block space-y-2">
+              <span className="text-sm font-medium">Linked budget line</span>
+              <select
+                name="budgetLineId"
+                defaultValue={changeOrder?.budgetLineId ?? ""}
+                className="border-border bg-background focus:border-primary w-full rounded-2xl border px-4 py-3 outline-none"
+              >
+                <option value="">— None —</option>
+                {budgetCategories.map((category) =>
+                  category.lines.map((line) => (
+                    <option key={line.id} value={line.id}>
+                      {category.label} / {line.label}
+                    </option>
+                  )),
+                )}
+              </select>
+            </label>
+          ) : null}
+
+          {hasMilestones ? (
+            <label className="block space-y-2">
+              <span className="text-sm font-medium">Linked milestone</span>
+              <select
+                name="scheduleMilestoneId"
+                defaultValue={changeOrder?.scheduleMilestoneId ?? ""}
+                className="border-border bg-background focus:border-primary w-full rounded-2xl border px-4 py-3 outline-none"
+              >
+                <option value="">— None —</option>
+                {schedulePhases.map((phase) =>
+                  phase.milestones.map((milestone) => (
+                    <option key={milestone.id} value={milestone.id}>
+                      {phase.name} / {milestone.label}
+                    </option>
+                  )),
+                )}
+              </select>
+            </label>
+          ) : null}
+        </div>
+      ) : null}
+
       <label className="block space-y-2">
         <span className="text-sm font-medium">Notes</span>
         <textarea
@@ -190,9 +274,41 @@ function ChangeOrderForm({
   );
 }
 
+function LinkedRecordsBadges({ changeOrder }: { changeOrder: ChangeOrder }) {
+  const links = [
+    changeOrder.scopeItem
+      ? `Scope: ${changeOrder.scopeItem.phaseName} / ${changeOrder.scopeItem.areaName} / ${changeOrder.scopeItem.label}`
+      : null,
+    changeOrder.budgetLine
+      ? `Budget: ${changeOrder.budgetLine.category.label} / ${changeOrder.budgetLine.label}`
+      : null,
+    changeOrder.scheduleMilestone
+      ? `Milestone: ${changeOrder.scheduleMilestone.phase.name} / ${changeOrder.scheduleMilestone.label}`
+      : null,
+  ].filter(Boolean);
+
+  if (links.length === 0) return null;
+
+  return (
+    <div className="mb-3 flex flex-wrap gap-2">
+      {links.map((link) => (
+        <span
+          key={link}
+          className="rounded-full border border-stone-200 bg-stone-100 px-3 py-1 text-xs text-stone-600"
+        >
+          {link}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function ChangeOrderManager({
   projectId,
   changeOrders,
+  scopeTree,
+  budgetCategories,
+  schedulePhases,
 }: ChangeOrderManagerProps) {
   return (
     <div className="space-y-6">
@@ -208,7 +324,12 @@ export function ChangeOrderManager({
           schedule drift stay visible without turning this into contract admin.
         </p>
         <div className="mt-8">
-          <ChangeOrderForm projectId={projectId} />
+          <ChangeOrderForm
+            projectId={projectId}
+            scopeTree={scopeTree}
+            budgetCategories={budgetCategories}
+            schedulePhases={schedulePhases}
+          />
         </div>
       </section>
 
@@ -235,7 +356,14 @@ export function ChangeOrderManager({
                   {changeOrder.requestedAt.toLocaleDateString()}
                 </span>
               </div>
-              <ChangeOrderForm projectId={projectId} changeOrder={changeOrder} />
+              <LinkedRecordsBadges changeOrder={changeOrder} />
+              <ChangeOrderForm
+                projectId={projectId}
+                changeOrder={changeOrder}
+                scopeTree={scopeTree}
+                budgetCategories={budgetCategories}
+                schedulePhases={schedulePhases}
+              />
             </div>
           ))}
         </section>

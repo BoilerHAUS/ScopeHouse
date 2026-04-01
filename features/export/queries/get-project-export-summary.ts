@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { getLatestProjectProgressSummaryForUser } from "@/features/ai/queries/get-latest-project-progress-summary";
+import { getProjectBudgetForUser } from "@/features/budget/queries/get-project-budget";
 import { listProjectChangeOrdersForUser } from "@/features/change-orders/queries/list-project-change-orders";
 import { listProjectDecisionsForUser } from "@/features/decisions/queries/list-project-decisions";
 import { getProjectIntakeForUser } from "@/features/intake/queries/get-project-intake";
@@ -19,7 +20,7 @@ function countScopeItems(
 
 export const getProjectExportSummaryForUser = cache(
   async (projectId: string, userId: string) => {
-    const [project, intakeRecord, scope, decisions, changeOrders, aiSummary] =
+    const [project, intakeRecord, scope, decisions, changeOrders, aiSummary, budget] =
       await Promise.all([
         getProjectForUser(projectId, userId),
         getProjectIntakeForUser(projectId, userId),
@@ -27,6 +28,7 @@ export const getProjectExportSummaryForUser = cache(
         listProjectDecisionsForUser(projectId, userId),
         listProjectChangeOrdersForUser(projectId, userId),
         getLatestProjectProgressSummaryForUser(projectId, userId),
+        getProjectBudgetForUser(projectId, userId),
       ]);
 
     if (!project || !intakeRecord || !changeOrders) {
@@ -58,6 +60,7 @@ export const getProjectExportSummaryForUser = cache(
       decisions,
       changeOrders,
       aiSummary,
+      budget: budget ?? null,
       readiness: {
         intakeReady: Boolean(intake?.completedAt),
         scopeReady: scopeItemCount > 0,

@@ -47,6 +47,14 @@ export const getProjectBudgetForUser = cache(
                 sourceReference: true,
                 notes: true,
                 itemOrder: true,
+                scopeItem: {
+                  select: {
+                    id: true,
+                    label: true,
+                    phaseName: true,
+                    areaName: true,
+                  },
+                },
               },
             },
           },

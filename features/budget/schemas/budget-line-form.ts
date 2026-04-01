@@ -32,6 +32,10 @@ const centsField = z
 export const budgetLineFormSchema = z.object({
   lineId: z.string().optional(),
   categoryId: z.string().min(1, "Choose a budget category."),
+  scopeItemId: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : null)),
   label: z.string().trim().min(2, "Enter a line item label.").max(160),
   estimate: centsField,
   allowance: centsField,
@@ -55,6 +59,7 @@ export type BudgetLineActionState = {
   fieldErrors?: Partial<
     Record<
       | "categoryId"
+      | "scopeItemId"
       | "label"
       | "estimate"
       | "allowance"

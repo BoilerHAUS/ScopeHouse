@@ -40,9 +40,9 @@ enum ContractorInvolvement {
 
 enum ActivityEventType {
   project_created
+  project_updated
   project_archived
   project_restored
-  project_updated
   intake_started
   intake_saved
   intake_completed
@@ -268,6 +268,7 @@ model ScopeItem {
   updatedAt         DateTime        @updatedAt
   appliedFromDraft  ScopeDraft?     @relation(fields: [appliedFromDraftId], references: [id], onDelete: SetNull)
   budgetLines       BudgetLine[]
+  changeOrders      ChangeOrder[]
   project           Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId, phaseOrder, areaOrder, itemOrder])
@@ -345,6 +346,7 @@ model BudgetLine {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   category        BudgetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  changeOrders    ChangeOrder[]
   project         Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   scopeItem       ScopeItem?     @relation(fields: [scopeItemId], references: [id], onDelete: SetNull)
 
@@ -378,8 +380,9 @@ model ScheduleMilestone {
   itemOrder   Int
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  phase       SchedulePhase @relation(fields: [phaseId], references: [id], onDelete: Cascade)
-  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  changeOrders ChangeOrder[]
+  phase        SchedulePhase @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId, phaseId, itemOrder])
   @@index([phaseId, itemOrder])
@@ -427,22 +430,31 @@ model ProjectPhoto {
 }
 
 model ChangeOrder {
-  id               String            @id @default(cuid())
-  projectId        String
-  title            String
-  description      String
-  status           ChangeOrderStatus @default(proposed)
-  requestedAt      DateTime
-  impactSummary    String
-  budgetReference  String?
-  scheduleReference String?
-  notes            String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  project          Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id                  String             @id @default(cuid())
+  projectId           String
+  title               String
+  description         String
+  status              ChangeOrderStatus  @default(proposed)
+  requestedAt         DateTime
+  impactSummary       String
+  budgetReference     String?
+  scheduleReference   String?
+  scopeItemId         String?
+  budgetLineId        String?
+  scheduleMilestoneId String?
+  notes               String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  project             Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scopeItem           ScopeItem?         @relation(fields: [scopeItemId], references: [id], onDelete: SetNull)
+  budgetLine          BudgetLine?        @relation(fields: [budgetLineId], references: [id], onDelete: SetNull)
+  scheduleMilestone   ScheduleMilestone? @relation(fields: [scheduleMilestoneId], references: [id], onDelete: SetNull)
 
   @@index([projectId, requestedAt])
   @@index([status])
+  @@index([scopeItemId])
+  @@index([budgetLineId])
+  @@index([scheduleMilestoneId])
 }
 
 model Session {

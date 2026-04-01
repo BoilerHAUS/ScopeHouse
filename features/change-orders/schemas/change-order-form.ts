@@ -7,6 +7,13 @@ export const CHANGE_ORDER_STATUS_OPTIONS = [
   { value: "implemented", label: "Implemented" },
 ] as const;
 
+function optionalId() {
+  return z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : null));
+}
+
 function optionalText(max: number) {
   return z
     .string()
@@ -34,6 +41,9 @@ export const changeOrderFormSchema = z.object({
   impactSummary: z.string().trim().min(8, "Summarize the impact.").max(800),
   budgetReference: optionalText(160),
   scheduleReference: optionalText(160),
+  scopeItemId: optionalId(),
+  budgetLineId: optionalId(),
+  scheduleMilestoneId: optionalId(),
   notes: optionalText(500),
 });
 
@@ -49,6 +59,9 @@ export type ChangeOrderFormActionState = {
       | "impactSummary"
       | "budgetReference"
       | "scheduleReference"
+      | "scopeItemId"
+      | "budgetLineId"
+      | "scheduleMilestoneId"
       | "notes",
       string
     >

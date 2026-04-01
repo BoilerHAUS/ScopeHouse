@@ -12,10 +12,13 @@ import {
 import type { getProjectBudgetForUser } from "@/features/budget/queries/get-project-budget";
 import type { BudgetCategoryActionState } from "@/features/budget/schemas/budget-category-form";
 import type { BudgetLineActionState } from "@/features/budget/schemas/budget-line-form";
+import type { getProjectScopeForUser } from "@/features/scope/queries/get-project-scope";
 
 type ProjectBudgetData = NonNullable<
   Awaited<ReturnType<typeof getProjectBudgetForUser>>
 >;
+
+type ScopeTree = Awaited<ReturnType<typeof getProjectScopeForUser>>;
 
 const initialCategoryState: BudgetCategoryActionState = {};
 const initialLineState: BudgetLineActionState = {};
@@ -141,10 +144,12 @@ function CategoryForm({
 function BudgetLineForm({
   projectId,
   categoryId,
+  scopeTree,
   line,
 }: {
   projectId: string;
   categoryId: string;
+  scopeTree: ScopeTree;
   line?: ProjectBudgetData["categories"][number]["lines"][number];
 }) {
   const [state, formAction, pending] = useActionState(
@@ -167,6 +172,31 @@ function BudgetLineForm({
           required
         />
       </label>
+
+      {scopeTree.length > 0 ? (
+        <label className="block space-y-2">
+          <span className="text-sm font-medium">Linked scope item</span>
+          <select
+            name="scopeItemId"
+            defaultValue={line?.scopeItemId ?? ""}
+            className="border-border bg-background focus:border-primary w-full rounded-2xl border px-4 py-3 outline-none"
+          >
+            <option value="">— None —</option>
+            {scopeTree.map((phase) =>
+              phase.areas.map((area) =>
+                area.items.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {phase.phaseName} / {area.areaName} / {item.label}
+                  </option>
+                )),
+              ),
+            )}
+          </select>
+          {state.fieldErrors?.scopeItemId ? (
+            <p className="text-destructive text-sm">{state.fieldErrors.scopeItemId}</p>
+          ) : null}
+        </label>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <AmountInput name="estimate" label="Estimate" defaultValue={line?.estimateCents} />
@@ -231,9 +261,11 @@ function BudgetLineForm({
 export function BudgetPlanner({
   projectId,
   budget,
+  scopeTree,
 }: {
   projectId: string;
   budget: ProjectBudgetData;
+  scopeTree: ScopeTree;
 }) {
   return (
     <div className="space-y-6">
@@ -324,14 +356,21 @@ export function BudgetPlanner({
 
               <div className="mt-8 space-y-4">
                 {category.lines.map((line) => (
-                  <BudgetLineForm
-                    key={line.id}
-                    projectId={projectId}
-                    categoryId={category.id}
-                    line={line}
-                  />
+                  <div key={line.id} className="space-y-1">
+                    {line.scopeItem ? (
+                      <p className="text-muted px-1 text-xs">
+                        Scope: {line.scopeItem.phaseName} / {line.scopeItem.areaName} / {line.scopeItem.label}
+                      </p>
+                    ) : null}
+                    <BudgetLineForm
+                      projectId={projectId}
+                      categoryId={category.id}
+                      scopeTree={scopeTree}
+                      line={line}
+                    />
+                  </div>
                 ))}
-                <BudgetLineForm projectId={projectId} categoryId={category.id} />
+                <BudgetLineForm projectId={projectId} categoryId={category.id} scopeTree={scopeTree} />
               </div>
             </div>
           ))}
