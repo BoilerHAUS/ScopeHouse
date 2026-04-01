@@ -32,3 +32,19 @@ export async function listUserWorkspaceIds(userId: string) {
 
   return memberships.map((membership) => membership.workspaceId);
 }
+
+export async function getDefaultWorkspaceIdForUser(userId: string) {
+  const membership = await db.workspaceMember.findFirst({
+    where: {
+      userId,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+    select: {
+      workspaceId: true,
+    },
+  });
+
+  return membership?.workspaceId ?? null;
+}

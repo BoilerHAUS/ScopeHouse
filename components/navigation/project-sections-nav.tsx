@@ -8,9 +8,19 @@ import { cn } from "@/lib/utils";
 
 type ProjectSectionsNavProps = {
   projectId: string;
+  projectTitle?: string;
+  projectStatus?: string;
 };
 
-export function ProjectSectionsNav({ projectId }: ProjectSectionsNavProps) {
+function formatLabel(value: string) {
+  return value.replaceAll("_", " ");
+}
+
+export function ProjectSectionsNav({
+  projectId,
+  projectTitle,
+  projectStatus,
+}: ProjectSectionsNavProps) {
   const pathname = usePathname();
 
   return (
@@ -19,10 +29,21 @@ export function ProjectSectionsNav({ projectId }: ProjectSectionsNavProps) {
         <p className="text-muted font-mono text-xs tracking-[0.24em] uppercase">
           Project Workspace
         </p>
-        <p className="text-foreground/80 mt-2 text-sm leading-7">
-          Use one navigation rail for intake, scope, planning, evidence, and
-          export. Keep the working route structure obvious.
-        </p>
+        {projectTitle ? (
+          <div className="mt-3 space-y-2">
+            <p className="text-base font-semibold">{projectTitle}</p>
+            {projectStatus ? (
+              <p className="text-muted text-xs uppercase tracking-[0.2em]">
+                {formatLabel(projectStatus)}
+              </p>
+            ) : null}
+          </div>
+        ) : (
+          <p className="text-foreground/80 mt-2 text-sm leading-7">
+            Use one navigation rail for intake, scope, planning, evidence, and
+            export. Keep the working route structure obvious.
+          </p>
+        )}
       </div>
       <nav className="border-border bg-surface rounded-[1.75rem] border p-2 shadow-[0_16px_40px_rgba(54,42,20,0.05)]">
         <ul className="space-y-1">
