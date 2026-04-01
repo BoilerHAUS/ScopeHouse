@@ -2,30 +2,36 @@ import { cache } from "react";
 import { db } from "@/server/db/client";
 import { listUserWorkspaceIds } from "@/server/permissions/workspace";
 
-export const listProjectsForUser = cache(async (userId: string) => {
-  const workspaceIds = await listUserWorkspaceIds(userId);
+type ListProjectsForUserOptions = {
+  archived?: boolean;
+};
 
-  if (workspaceIds.length === 0) {
-    return [];
-  }
+export const listProjectsForUser = cache(
+  async (userId: string, options: ListProjectsForUserOptions = {}) => {
+    const workspaceIds = await listUserWorkspaceIds(userId);
+    const archived = options.archived ?? false;
 
-  return db.project.findMany({
-    where: {
-      workspaceId: {
-        in: workspaceIds,
+    if (workspaceIds.length === 0) {
+      return [];
+    }
+
+    return db.project.findMany({
+      where: {
+        workspaceId: {
+          in: workspaceIds,
+        },
+        archivedAt: archived ? { not: null } : null,
       },
-      archivedAt: null,
-    },
-    orderBy: {
-      updatedAt: "desc",
-    },
-    select: {
-      id: true,
-      title: true,
-      projectType: true,
-      status: true,
-      locationLabel: true,
-      updatedAt: true,
-    },
-  });
-});
+      orderBy: archived ? { archivedAt: "desc" } : { updatedAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        projectType: true,
+        status: true,
+        locationLabel: true,
+        archivedAt: true,
+        updatedAt: true,
+      },
+    });
+  },
+);

@@ -25,6 +25,7 @@ export const getProjectForUser = cache(
         locationLabel: true,
         goals: true,
         status: true,
+        archivedAt: true,
         createdAt: true,
         updatedAt: true,
       },
