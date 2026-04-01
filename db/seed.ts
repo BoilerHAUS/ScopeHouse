@@ -1,6 +1,11 @@
 import { config as loadEnv } from "dotenv";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient, WorkspaceRole } from "@prisma/client";
+import {
+  PrismaClient,
+  ProjectStatus,
+  ProjectType,
+  WorkspaceRole,
+} from "@prisma/client";
 import { hash } from "bcryptjs";
 
 loadEnv();
@@ -60,6 +65,34 @@ async function main() {
       workspaceId: workspace.id,
       userId: user.id,
       role: WorkspaceRole.OWNER,
+    },
+  });
+
+  await prisma.project.upsert({
+    where: {
+      id: "scopehouse-demo-project",
+    },
+    update: {
+      title: "Demo Kitchen Renovation",
+      projectType: ProjectType.kitchen,
+      locationLabel: "Toronto, ON",
+      goals:
+        "Create a calmer kitchen layout, improve storage, and prepare the project for scope planning.",
+      status: ProjectStatus.intake,
+      workspaceId: workspace.id,
+      createdById: user.id,
+      archivedAt: null,
+    },
+    create: {
+      id: "scopehouse-demo-project",
+      title: "Demo Kitchen Renovation",
+      projectType: ProjectType.kitchen,
+      locationLabel: "Toronto, ON",
+      goals:
+        "Create a calmer kitchen layout, improve storage, and prepare the project for scope planning.",
+      status: ProjectStatus.intake,
+      workspaceId: workspace.id,
+      createdById: user.id,
     },
   });
 }

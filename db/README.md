@@ -28,5 +28,12 @@ The initial schema is intentionally narrow:
 - `User`
 - `Workspace`
 - `WorkspaceMember`
+- `Project`
 
-Project models come in later issues.
+The project model now includes:
+
+- workspace ownership
+- creator linkage
+- status enum
+- project type enum
+- archival support

@@ -11,15 +11,35 @@ enum WorkspaceRole {
   MEMBER
 }
 
+enum ProjectType {
+  kitchen
+  bathroom
+  addition
+  whole_home
+  basement
+  outdoor
+  other
+}
+
+enum ProjectStatus {
+  draft
+  intake
+  scope_review
+  planning
+  in_progress
+  closeout
+}
+
 model User {
-  id          String            @id @default(cuid())
-  email       String            @unique
-  name        String?
+  id           String            @id @default(cuid())
+  email        String            @unique
+  name         String?
   passwordHash String
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  memberships WorkspaceMember[]
-  sessions    Session[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  memberships  WorkspaceMember[]
+  sessions     Session[]
+  createdProjects Project[]      @relation("ProjectCreator")
 }
 
 model Workspace {
@@ -29,6 +49,7 @@ model Workspace {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   memberships WorkspaceMember[]
+  projects    Project[]
 }
 
 model WorkspaceMember {
@@ -44,6 +65,27 @@ model WorkspaceMember {
   @@unique([workspaceId, userId])
   @@index([userId])
   @@index([workspaceId])
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  workspaceId   String
+  createdById   String
+  title         String
+  projectType   ProjectType
+  locationLabel String?
+  goals         String?
+  status        ProjectStatus @default(draft)
+  archivedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  createdBy     User          @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([createdById])
+  @@index([status])
+  @@index([archivedAt])
 }
 
 model Session {

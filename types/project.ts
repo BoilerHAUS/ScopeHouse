@@ -1,27 +1,32 @@
-import type { EntityId, IsoDateString, RecordStatus } from "@/types/common";
+import type { EntityId, IsoDateString } from "@/types/common";
 
 export type ProjectType =
   | "kitchen"
   | "bathroom"
   | "addition"
-  | "whole-home"
+  | "whole_home"
   | "basement"
   | "outdoor"
   | "other";
 
 export type ProjectStatus =
-  | RecordStatus
+  | "draft"
   | "intake"
-  | "scope-review"
+  | "scope_review"
   | "planning"
-  | "in-progress"
+  | "in_progress"
   | "closeout";
 
 export type ProjectSummary = {
   id: EntityId;
+  workspaceId: EntityId;
+  createdById: EntityId;
   title: string;
-  locationLabel: string;
-  type: ProjectType;
+  locationLabel: string | null;
+  goals: string | null;
+  projectType: ProjectType;
   status: ProjectStatus;
+  archivedAt: IsoDateString | null;
   createdAt: IsoDateString;
+  updatedAt: IsoDateString;
 };
