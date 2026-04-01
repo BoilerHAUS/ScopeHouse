@@ -107,6 +107,7 @@ export type ProjectIntakeFormValues = {
 export type SaveProjectIntakeActionState = {
   error?: string;
   success?: string;
+  completed?: boolean;
   fieldErrors?: Partial<Record<keyof ProjectIntakeFormValues, string>>;
 };
 

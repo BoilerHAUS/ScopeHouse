@@ -1,194 +1,316 @@
-# ScopeHouse MVP Roadmap
+# ScopeHouse Roadmap
 
-## Goal
+## Status
 
-Ship a credible MVP that proves the core ScopeHouse promise:
+The original MVP roadmap is complete.
+
+Completed MVP outcomes:
 
 - create a renovation project
 - structure intake
 - generate and edit a draft scope
-- record key decisions
-- export a clean project summary
+- plan budget and schedule
+- upload documents and photos
+- record decisions and change orders
+- export a clean project summary and PDF
+
+The roadmap now shifts from MVP delivery to two follow-on tracks:
+
+1. beta hardening and operations
+2. post-MVP product expansion
 
 ## Roadmap Principles
 
-- keep the first release narrow and useful
-- favor workflow clarity over breadth
-- ship the first vertical slice early
-- treat AI as support, not hidden automation
-- avoid enterprise complexity before product fit
+- keep the first beta stable before widening scope
+- favor trust, auditability, and recoverability over new surface area
+- add tests and operational controls before adding expensive workflow breadth
+- keep AI outputs reviewable and failure states explicit
+- extend planning relationships only where they improve real user visibility
 
-## Milestones
+## Completed Milestones
 
 ### 1. Foundation
 
-Focus:
+Completed issues:
 
-- initialize app and toolchain
-- establish app shell and navigation
-- set up database and migration workflow
-- add auth and workspace guardrails
-
-Exit criteria:
-
-- app runs locally
-- database workflow is documented and working
-- authenticated areas are protected
-- repo structure is stable enough for feature work
+- Issue 1, initialize app and toolchain
+- Issue 2, app shell and navigation
+- Issue 3, database and migrations
+- Issue 4, auth and workspace guardrails
 
 ### 2. Core Project Model
 
-Focus:
+Completed issues:
 
-- implement project schema and status model
-- ship create project flow
-- ship project overview
-- add lightweight activity log foundation
-
-Exit criteria:
-
-- users can create and open projects
-- project state is represented clearly
-- key events are recordable for trust and reporting
+- Issue 5, project data model
+- Issue 6, create project flow
+- Issue 7, project overview
+- Issue 8, activity log foundation
 
 ### 3. Scope Builder
 
-Focus:
+Completed issues:
 
-- guided intake model and multi-step form
-- scope data model with phase, room, and work-item structure
-- manual scope editing flow
-
-Exit criteria:
-
-- users can complete intake
-- the project has a structured editable scope baseline
+- Issue 9, guided intake flow
+- Issue 10, scope data model
+- Issue 11, manual scope editor
 
 ### 4. Budget Planner
 
-Focus:
+Completed issues:
 
-- budget categories and lines
-- planner UI with totals
-- reusable calculation logic with tests
-
-Exit criteria:
-
-- users can create a first-pass budget
-- totals are reliable and tested
+- Issues 12 to 14, budget planner and calculations
 
 ### 5. Schedule Planner
 
-Focus:
+Completed issues:
 
-- phase and milestone model
-- lightweight schedule planner UI
-
-Exit criteria:
-
-- users can define ordered phases and milestones
-- schedule supports visibility without heavy planning logic
+- Issues 15 to 16, schedule planner
 
 ### 6. Documents And Photos
 
-Focus:
+Completed issues:
 
-- document upload model and storage flow
-- photo log model and upload flow
-
-Exit criteria:
-
-- users can attach files and photos to a project
-- storage and retrieval work securely
+- Issues 17 to 18, documents and photos
 
 ### 7. Decisions And Change Orders
 
-Focus:
+Completed issues:
 
-- decision log model and CRUD flow
-- change order model and CRUD flow
-
-Exit criteria:
-
-- project decisions and changes are tracked in context
-- status and ownership fields are reliable
+- Issue 19, decisions
+- Issue 20, change orders
 
 ### 8. AI Workflows
 
-Focus:
+Completed issues:
 
-- shared AI wrapper, prompt system, and output schemas
-- AI-assisted scope draft generation
-- AI-assisted project summary generation
-
-Exit criteria:
-
-- AI outputs are structured and reviewable
-- no high-impact project changes happen without confirmation
+- Issue 21, AI wrapper and prompt system
+- Issue 22, AI scope draft generation
+- Issue 23, AI project summary generation
 
 ### 9. Export And Reporting
 
+Completed issues:
+
+- Issue 24, export view
+- Issue 25, PDF generation
+
+## Open Work
+
+### 10. Beta Hardening And Operations
+
 Focus:
 
-- print-friendly export view
-- PDF generation for project summary
+- fix user-facing bugs in the core planning loop
+- remove known build and operational rough edges
+- add automated coverage around protected and high-risk workflows
+- expand project auditability
+- close obvious lifecycle and failure-state gaps
+- make local testing and VPS deployment more repeatable
+
+Open issues in this track:
+
+- Issue 39, bug: when creating an account, repeat password
+- Issue 40, bug: next steps after constraints and supports is filled out
+- Issue 41, bug: generate AI draft failure
+- Issue 26, resolve Turbopack file tracing warning for local storage adapter
+- Issue 27, add integration test coverage for authenticated project workflows
+- Issue 28, add targeted tests for server actions, queries, and core planning logic
+- Issue 29, expand activity log coverage across planning workflows
+- Issue 30, add document and photo deletion flows
+- Issue 32, improve AI project summary UX for missing configuration and provider failures
+- Issue 42, add Dockerfile and Dokploy deployment scaffold
+- Issue 33, add a pluggable production storage adapter boundary
+- Issue 37, add rate limiting to API routes and server actions
 
 Exit criteria:
 
-- users can generate a credible shareable PDF project summary
+- the core create-account, intake, and AI draft loop works for manual local testing
+- builds are clean enough to trust in CI and deployment
+- critical project workflows have meaningful automated coverage
+- high-signal project actions are visible in activity history
+- destructive and AI-failure paths are explicit and safe
+- Dokploy deployment is no longer blocked by missing container packaging
 
-## Recommended Delivery Order
+### 11. Planning Model Refinement
 
-### Vertical slice first
+Focus:
 
-1. Issue 1, initialize app and toolchain
-2. Issue 2, app shell and navigation
-3. Issue 3, database and migrations
-4. Issue 4, auth and workspace guardrails
-5. Issue 5, project data model
-6. Issue 6, create project flow
-7. Issue 7, project overview
-8. Issue 9, guided intake flow
-9. Issue 10, scope data model
-10. Issue 21, AI prompt and wrapper system
-11. Issue 22, AI-assisted scope draft generation
-12. Issue 11, manual scope editor
-13. Issue 19, decision log
-14. Issue 24, export summary view
-15. Issue 25, PDF generation
+- tighten planning relationships that already exist in schema or UI intent
+- improve data linkage across budget, scope, schedule, and change control
+- add project lifecycle controls for real-world use
 
-This sequence proves the first MVP promise quickly:
+Open issues in this track:
 
-- create project
-- complete guided intake
-- generate AI draft scope
-- edit scope
-- record decisions
-- export project summary
+- Issue 31, add structured links from change orders to scope, budget, and schedule records
+- Issue 35, add project archiving and restore flow
+- Issue 36, add budget line to scope item linking UI
 
-### Follow-on work
+Exit criteria:
 
-After the first vertical slice lands, continue with:
+- users can archive and restore projects without losing data
+- budget and change records can point to the planning objects they affect
+- planning relationships are visible enough to support exports and review
 
-- Issue 8, activity log foundation
-- Issues 12 to 14, budget planner and calculations
-- Issues 15 to 16, schedule planner
-- Issues 17 to 18, documents and photos
-- Issue 20, change orders
-- Issue 23, AI project summary generation
+### 12. Workflow Expansion
 
-## Suggested Milestone Targets
+Focus:
 
-- Milestone 1 to 3: get to first usable planning loop
-- Milestone 4 to 7: add project control and evidence
-- Milestone 8 to 9: add leverage and shareable output
+- add new user-facing planning outputs
+- add the next AI workflow after scope draft and project summary
 
-## Release Readiness Gate
+Open issues in this track:
 
-The MVP is ready for a limited beta when:
+- Issue 34, add quote comparison AI workflow and quotes feature
+- Issue 38, add CSV export for budget and scope data
 
-- a user can complete the first vertical slice without manual intervention
-- the system protects project ownership and data access
-- AI outputs are reviewable and safe
-- export output is clean enough to share externally
-- critical budget and scope logic has test coverage where required
+Exit criteria:
+
+- users can compare contractor quotes against project scope in a structured review flow
+- users can export scope and budget data in spreadsheet-friendly formats
+
+## Recommended Execution Order
+
+### Immediate priority
+
+These issues best support a credible limited beta:
+
+1. Issue 41, bug: generate AI draft failure
+2. Issue 40, bug: next steps after constraints and supports is filled out
+3. Issue 39, bug: when creating an account, repeat password
+4. Issue 26, resolve Turbopack file tracing warning for local storage adapter
+5. Issue 32, improve AI project summary UX for missing configuration and provider failures
+6. Issue 27, add integration test coverage for authenticated project workflows
+7. Issue 28, add targeted tests for server actions, queries, and core planning logic
+8. Issue 29, expand activity log coverage across planning workflows
+9. Issue 30, add document and photo deletion flows
+10. Issue 37, add rate limiting to API routes and server actions
+11. Issue 42, add Dockerfile and Dokploy deployment scaffold
+12. Issue 33, add a pluggable production storage adapter boundary
+
+Why this order:
+
+- Issues 41 and 40 block or weaken the core MVP planning loop during manual testing
+- Issue 39 closes a standard auth UX and data-quality gap before broader user trials
+- Issue 26 removes a known build warning before deployment work piles on top
+- Issue 32 makes the current AI experience safer and clearer in local and beta environments
+- Issues 27 and 28 reduce regression risk before more feature depth is added
+- Issue 29 improves trust and future reporting quality across the now-broad MVP surface
+- Issue 30 closes an obvious lifecycle gap in the file workflows
+- Issue 37 addresses abuse risk before broader beta exposure
+- Issue 42 makes Dokploy deployment realistic once the core app is stable enough to ship
+- Issue 33 should follow once the local and container deployment paths are clearer
+
+### Next priority
+
+These issues improve the planning model without expanding into entirely new workflows:
+
+13. Issue 35, add project archiving and restore flow
+14. Issue 36, add budget line to scope item linking UI
+15. Issue 31, add structured links from change orders to scope, budget, and schedule records
+
+Why this order:
+
+- Issue 35 improves day-to-day usability with relatively low coupling
+- Issue 36 exposes a relationship that already exists in schema and will help later reporting
+- Issue 31 becomes stronger once budget and scope linkage is already visible in the UI
+
+### Expansion priority
+
+These issues widen the product surface after the beta base is harder and cleaner:
+
+16. Issue 38, add CSV export for budget and scope data
+17. Issue 34, add quote comparison AI workflow and quotes feature
+
+Why this order:
+
+- Issue 38 extends existing data flows with moderate risk and no new AI surface
+- Issue 34 is the broadest remaining workflow addition and should follow the hardening pass
+
+## Mapping Open Issues To Roadmap Themes
+
+- Core loop bugs:
+  Issues 39, 40, 41
+- Build and ops hardening:
+  Issues 26, 32, 37, 42
+- Testing and reliability:
+  Issues 27, 28
+- Auditability and lifecycle:
+  Issues 29, 30, 35
+- Data model refinement:
+  Issues 31, 36
+- Deployment architecture:
+  Issue 33
+- Workflow expansion:
+  Issues 34, 38
+
+## Local Testing Workflow
+
+Use this loop for manual local testing before opening new feature work or validating bug fixes:
+
+1. `npm install`
+2. `cp .env.example .env.local`
+3. Fill `.env.local`
+   Required:
+   - `DATABASE_URL`
+   Optional for AI:
+   - `OPENAI_API_KEY`
+   - `OPENAI_MODEL`
+4. `npm run db:start`
+5. `npm run db:migrate -- --name local_sync`
+6. `npm run db:seed`
+7. `npm run dev`
+8. Open `http://localhost:3000`
+9. Sign in with the seeded demo account
+   - `owner@scopehouse.local`
+   - `scopehouse-demo`
+
+Local validation commands:
+
+- `npm run lint`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+
+Manual smoke path:
+
+1. create or open a project
+2. complete guided intake
+3. move into scope drafting
+4. review budget and schedule pages
+5. verify documents, photos, decisions, change orders, and export routes load
+
+## Dokploy Preparation
+
+Dokploy or VPS deployment is now part of the post-MVP roadmap, but not yet complete in the repo.
+
+Deployment blockers currently tracked:
+
+- Issue 26, build warning cleanup
+- Issue 42, Dockerfile and Dokploy deployment scaffold
+- Issue 33, production storage adapter boundary
+
+## Beta Readiness Gate
+
+The next limited beta should start only after most of Milestone 10 is complete.
+
+Minimum gate:
+
+- Issues 39 to 41 are resolved
+- Issue 26 is done
+- Issue 27 or 28 is done enough to give meaningful automated coverage
+- Issue 32 is done
+- Issue 37 is done
+- document and photo lifecycle is no longer upload-only
+
+Preferred gate:
+
+- Milestone 10 is substantially complete
+
+## Notes
+
+This roadmap was updated on April 1, 2026 against the current open GitHub issue set.
+
+Current open issues reviewed:
+
+- 26 to 42, excluding completed MVP issues 1 to 25

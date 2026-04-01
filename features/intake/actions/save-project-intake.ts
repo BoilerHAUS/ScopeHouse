@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
@@ -197,11 +198,14 @@ export async function saveProjectIntakeAction(
   revalidatePath("/projects");
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/intake`);
+  revalidatePath(`/projects/${projectId}/scope`);
+
+  if (result.data.intent === "complete" && nextCompletedAt) {
+    redirect(`/projects/${projectId}/scope`);
+  }
 
   return {
-    success:
-      result.data.intent === "complete" && nextCompletedAt
-        ? "Intake marked complete. You can now move into scope drafting."
-        : "Intake progress saved.",
+    success: "Intake progress saved.",
+    completed: false,
   };
 }

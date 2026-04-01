@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { saveProjectIntakeAction } from "@/features/intake/actions/save-project-intake";
@@ -73,6 +74,7 @@ export function GuidedIntakeForm({
 
   const stepStates = steps.map((_, index) => isStepComplete(values, index));
   const canMoveNext = stepStates[currentStep];
+  const showScopeCta = isCompleted || state.completed === true;
 
   function updateValue<K extends keyof ProjectIntakeFormValues>(
     key: K,
@@ -133,6 +135,16 @@ export function GuidedIntakeForm({
             <p className="mt-3 rounded-2xl bg-emerald-500/10 px-3 py-3 text-sm text-emerald-700">
               {state.success}
             </p>
+          ) : null}
+          {showScopeCta ? (
+            <div className="mt-4 rounded-[1.35rem] border border-emerald-200 bg-emerald-500/8 px-4 py-4">
+              <p className="text-sm font-medium text-emerald-800">
+                Intake is complete. The next step is scope drafting.
+              </p>
+              <Button asChild className="mt-3 rounded-full px-4">
+                <Link href={`/projects/${projectId}/scope`}>Open scope drafting</Link>
+              </Button>
+            </div>
           ) : null}
         </div>
       </aside>
@@ -314,6 +326,10 @@ export function GuidedIntakeForm({
                   <p className="text-muted text-xs leading-6">
                     Use one line per constraint, dependency, or risk.
                   </p>
+                  <p className="text-muted text-xs leading-6">
+                    Once this step is complete, ScopeHouse will move you directly
+                    into scope drafting.
+                  </p>
                   {state.fieldErrors?.constraintsRaw ? (
                     <p className="text-destructive text-sm">
                       {state.fieldErrors.constraintsRaw}
@@ -420,7 +436,11 @@ export function GuidedIntakeForm({
               className="rounded-full px-5"
               disabled={pending}
             >
-              {pending ? "Saving..." : "Complete intake"}
+              {pending
+                ? "Saving..."
+                : currentStep === steps.length - 1
+                  ? "Complete intake and open scope"
+                  : "Complete intake"}
             </Button>
           </div>
         </div>

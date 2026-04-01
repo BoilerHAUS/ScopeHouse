@@ -35,10 +35,14 @@ export function SignUpForm() {
             type="text"
             name="name"
             autoComplete="name"
+            defaultValue={state.formValues?.name ?? ""}
             className="border-border bg-background focus:border-primary w-full rounded-2xl border px-4 py-3 outline-none"
             placeholder="Jamie Builder"
             required
           />
+          {state.fieldErrors?.name ? (
+            <p className="text-destructive text-sm">{state.fieldErrors.name}</p>
+          ) : null}
         </label>
         <label className="block space-y-2">
           <span className="text-sm font-medium">Email</span>
@@ -46,10 +50,14 @@ export function SignUpForm() {
             type="email"
             name="email"
             autoComplete="email"
+            defaultValue={state.formValues?.email ?? ""}
             className="border-border bg-background focus:border-primary w-full rounded-2xl border px-4 py-3 outline-none"
             placeholder="jamie@example.com"
             required
           />
+          {state.fieldErrors?.email ? (
+            <p className="text-destructive text-sm">{state.fieldErrors.email}</p>
+          ) : null}
         </label>
         <label className="block space-y-2">
           <span className="text-sm font-medium">Password</span>
@@ -62,6 +70,28 @@ export function SignUpForm() {
             minLength={8}
             required
           />
+          {state.fieldErrors?.password ? (
+            <p className="text-destructive text-sm">
+              {state.fieldErrors.password}
+            </p>
+          ) : null}
+        </label>
+        <label className="block space-y-2">
+          <span className="text-sm font-medium">Confirm password</span>
+          <input
+            type="password"
+            name="confirmPassword"
+            autoComplete="new-password"
+            className="border-border bg-background focus:border-primary w-full rounded-2xl border px-4 py-3 outline-none"
+            placeholder="Re-enter your password"
+            minLength={8}
+            required
+          />
+          {state.fieldErrors?.confirmPassword ? (
+            <p className="text-destructive text-sm">
+              {state.fieldErrors.confirmPassword}
+            </p>
+          ) : null}
         </label>
         {state.error ? (
           <p className="bg-destructive/10 text-destructive rounded-2xl px-4 py-3 text-sm">

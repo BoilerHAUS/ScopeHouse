@@ -23,14 +23,19 @@
                     "type": "array",
                     "items": {
                       "type": "object",
-                      "required": ["label", "status"],
+                      "required": ["label", "status", "notes"],
                       "properties": {
                         "label": { "type": "string" },
                         "status": {
                           "type": "string",
                           "enum": ["included", "needs_info", "optional"]
                         },
-                        "notes": { "type": "string" }
+                        "notes": {
+                          "anyOf": [
+                            { "type": "string" },
+                            { "type": "null" }
+                          ]
+                        }
                       }
                     }
                   }
