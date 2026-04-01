@@ -1,19 +1,29 @@
-import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
+import { ProjectSummaryExportView } from "@/features/export/components/project-summary-export-view";
+import { getProjectExportSummaryForUser } from "@/features/export/queries/get-project-export-summary";
+import { requireCurrentUser } from "@/server/auth/session";
 
-export default function ProjectExportPage() {
+type ProjectExportPageProps = {
+  params: Promise<{
+    projectId: string;
+  }>;
+};
+
+export default async function ProjectExportPage({
+  params,
+}: ProjectExportPageProps) {
+  const user = await requireCurrentUser();
+  const { projectId } = await params;
+  const summary = await getProjectExportSummaryForUser(projectId, user.id);
+
+  if (!summary) {
+    notFound();
+  }
+
   return (
     <PageContainer>
-      <FeaturePlaceholder
-        eyebrow="Export"
-        title="Project export"
-        description="Exports are a first-class workflow for ScopeHouse. This page should assemble clean summaries that are credible to share."
-        points={[
-          "Support PDF summary generation.",
-          "Favor print-friendly structure and clarity.",
-          "Compose export inputs from feature queries, not page-level glue code.",
-        ]}
-      />
+      <ProjectSummaryExportView projectId={projectId} summary={summary} />
     </PageContainer>
   );
 }
