@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
+import { deleteProjectDocumentAction } from "@/features/documents/actions/delete-project-document";
 import { uploadProjectDocumentAction } from "@/features/documents/actions/upload-project-document";
 import type { listProjectDocumentsForUser } from "@/features/documents/queries/list-project-documents";
 import type { DocumentUploadActionState } from "@/features/documents/schemas/document-upload-form";
@@ -36,6 +38,7 @@ export function DocumentVault({
     uploadProjectDocumentAction.bind(null, projectId),
     initialState,
   );
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   return (
     <div className="space-y-6">
@@ -126,11 +129,44 @@ export function DocumentVault({
                     {document.contentType} · {formatFileSize(document.sizeBytes)}
                   </p>
                 </div>
-                <Button asChild variant="outline" className="rounded-full px-4">
-                  <Link href={`/projects/${projectId}/documents/${document.id}`} target="_blank">
-                    Open file
-                  </Link>
-                </Button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Button asChild variant="outline" className="rounded-full px-4">
+                    <Link href={`/projects/${projectId}/documents/${document.id}`} target="_blank">
+                      Open file
+                    </Link>
+                  </Button>
+                  {confirmingId === document.id ? (
+                    <form action={deleteProjectDocumentAction.bind(null, projectId)}>
+                      <input type="hidden" name="documentId" value={document.id} />
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="submit"
+                          variant="destructive"
+                          className="rounded-full px-4"
+                        >
+                          Confirm remove
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-full px-4"
+                          onClick={() => setConfirmingId(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="rounded-full px-4"
+                      onClick={() => setConfirmingId(document.id)}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
               </div>
               {document.tags.length > 0 ? (
                 <div className="mt-4 flex flex-wrap gap-2">

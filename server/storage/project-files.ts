@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import path from "node:path";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 
 function getStorageRoot() {
   return path.join(
@@ -98,4 +98,12 @@ export async function saveProjectFile({
 export async function readProjectFileBuffer(storageKey: string) {
   const { absolutePath } = resolveStoragePath(storageKey);
   return readFile(absolutePath);
+}
+
+export async function deleteProjectFile(storageKey: string) {
+  const { absolutePath } = resolveStoragePath(storageKey);
+  // Ignore ENOENT — the DB record is the source of truth; a missing file is not fatal.
+  await unlink(absolutePath).catch((err: NodeJS.ErrnoException) => {
+    if (err.code !== "ENOENT") throw err;
+  });
 }

@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
+import { deleteProjectPhotoAction } from "@/features/photos/actions/delete-project-photo";
 import { uploadProjectPhotoAction } from "@/features/photos/actions/upload-project-photo";
 import type { listProjectPhotosForUser } from "@/features/photos/queries/list-project-photos";
 import type { PhotoUploadActionState } from "@/features/photos/schemas/photo-upload-form";
@@ -37,6 +39,7 @@ export function PhotoLog({
     uploadProjectPhotoAction.bind(null, projectId),
     initialState,
   );
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
   return (
     <div className="space-y-6">
@@ -201,6 +204,40 @@ export function PhotoLog({
                     </span>
                   ) : null}
                 </div>
+
+                {confirmingId === photo.id ? (
+                  <form action={deleteProjectPhotoAction.bind(null, projectId)}>
+                    <input type="hidden" name="photoId" value={photo.id} />
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <Button
+                        type="submit"
+                        variant="destructive"
+                        className="rounded-full px-4"
+                      >
+                        Confirm remove
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="rounded-full px-4"
+                        onClick={() => setConfirmingId(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="pt-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="rounded-full px-4"
+                      onClick={() => setConfirmingId(photo.id)}
+                    >
+                      Remove photo
+                    </Button>
+                  </div>
+                )}
               </div>
             </article>
           ))}
