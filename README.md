@@ -51,10 +51,14 @@ It helps users plan, price, run, track, and finish renovation projects with one 
 6. Start the dev server with `npm run dev`.
 7. Open `http://localhost:3000`.
 
-For AI scope drafting, also set:
+For live AI scope drafting and AI project summaries, also set:
 
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL` default is `gpt-5-mini`
+
+If `OPENAI_API_KEY` is missing, the app still runs locally and the export page
+still works, but AI summary generation and other live model workflows will show
+an explicit unavailable state instead of generating output.
 
 ## Development Rules
 

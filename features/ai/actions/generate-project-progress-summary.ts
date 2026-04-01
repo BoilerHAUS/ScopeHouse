@@ -4,9 +4,13 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireCurrentUser } from "@/server/auth/session";
 import { generateProjectProgressSummaryForUser } from "@/features/ai/services/generate-project-progress-summary";
+import { normalizeAiWorkflowError } from "@/server/ai/errors";
 
 export type ProjectProgressSummaryActionState = {
   error?: string;
+  errorTitle?: string;
+  errorCode?: string;
+  helpText?: string;
 };
 
 export async function generateProjectProgressSummaryAction(
@@ -19,11 +23,16 @@ export async function generateProjectProgressSummaryAction(
   try {
     await generateProjectProgressSummaryForUser(projectId, user.id);
   } catch (error) {
+    const normalizedError = normalizeAiWorkflowError(
+      error,
+      "AI project summary generation",
+    );
+
     return {
-      error:
-        error instanceof Error
-          ? error.message
-          : "Unable to generate the project summary.",
+      error: normalizedError.message,
+      errorTitle: normalizedError.title,
+      errorCode: normalizedError.code,
+      helpText: normalizedError.configurationHint,
     } satisfies ProjectProgressSummaryActionState;
   }
 

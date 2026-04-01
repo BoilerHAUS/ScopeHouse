@@ -8,6 +8,10 @@ function getRequiredEnv(name: string) {
   return value;
 }
 
+function hasEnv(name: string) {
+  return Boolean(process.env[name]?.trim());
+}
+
 export const serverEnv = {
   get databaseUrl() {
     return getRequiredEnv("DATABASE_URL");
@@ -17,5 +21,8 @@ export const serverEnv = {
   },
   get openAiModel() {
     return process.env.OPENAI_MODEL || "gpt-5-mini";
+  },
+  get isOpenAiConfigured() {
+    return hasEnv("OPENAI_API_KEY");
   },
 };

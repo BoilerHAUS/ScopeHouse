@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
 import { ProjectSummaryExportView } from "@/features/export/components/project-summary-export-view";
 import { getProjectExportSummaryForUser } from "@/features/export/queries/get-project-export-summary";
+import { serverEnv } from "@/lib/env/server";
 import { requireCurrentUser } from "@/server/auth/session";
 
 type ProjectExportPageProps = {
@@ -23,7 +24,14 @@ export default async function ProjectExportPage({
 
   return (
     <PageContainer>
-      <ProjectSummaryExportView projectId={projectId} summary={summary} />
+      <ProjectSummaryExportView
+        projectId={projectId}
+        summary={summary}
+        aiAvailability={{
+          isConfigured: serverEnv.isOpenAiConfigured,
+          model: serverEnv.openAiModel,
+        }}
+      />
     </PageContainer>
   );
 }

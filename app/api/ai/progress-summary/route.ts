@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/server/auth/session";
 import { generateProjectProgressSummaryForUser } from "@/features/ai/services/generate-project-progress-summary";
+import { normalizeAiWorkflowError } from "@/server/ai/errors";
 
 type ProgressSummaryRouteBody = {
   projectId?: string;
@@ -47,16 +48,19 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
+    const normalizedError = normalizeAiWorkflowError(
+      error,
+      "AI project summary generation",
+    );
+
     return NextResponse.json(
       {
         workflow: "progress-summary",
         status: "failed",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Unable to generate the project summary.",
+        message: normalizedError.message,
+        error: normalizedError,
       },
-      { status: 400 },
+      { status: normalizedError.httpStatus },
     );
   }
 }

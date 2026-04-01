@@ -13,6 +13,10 @@ type ProjectExportSummary = NonNullable<
 type ProjectSummaryExportViewProps = {
   projectId: string;
   summary: ProjectExportSummary;
+  aiAvailability: {
+    isConfigured: boolean;
+    model: string;
+  };
 };
 
 function formatLabel(value: string) {
@@ -47,6 +51,7 @@ function EmptyState({ children }: { children: React.ReactNode }) {
 export function ProjectSummaryExportView({
   projectId,
   summary,
+  aiAvailability,
 }: ProjectSummaryExportViewProps) {
   const { project, intake, scope, decisions, changeOrders, aiSummary, readiness } =
     summary;
@@ -114,7 +119,11 @@ export function ProjectSummaryExportView({
         </div>
       </section>
 
-      <ProjectProgressSummaryPanel projectId={projectId} latestSummary={aiSummary} />
+      <ProjectProgressSummaryPanel
+        projectId={projectId}
+        latestSummary={aiSummary}
+        aiAvailability={aiAvailability}
+      />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_360px]">
         <div className="space-y-6">
