@@ -83,6 +83,8 @@ Relations:
 - has many `BudgetCategory`
 - has many `BudgetLine`
 - has many `Decision`
+- has many `ProjectDocument`
+- has many `ProjectPhoto`
 - has many `SchedulePhase`
 - has many `ScheduleMilestone`
 - has many `ScopeDraft`
@@ -126,8 +128,6 @@ Indexes:
 
 ## Next Likely Model Additions
 
-- `Document`
-- `Photo`
 - `ChangeOrder`
 
 ## Additional MVP Entities
@@ -319,6 +319,57 @@ Notes:
 
 - currency is stored in integer cents to avoid rounding drift
 - project planning totals prefer `actual` then `quoted` then `allowance` then `estimate`
+
+### ProjectDocument
+
+Purpose:
+
+- stores uploaded project files with secure retrieval metadata
+- keeps document context linked to the project and uploader
+
+Key fields:
+
+- `projectId`
+- `createdById`
+- `originalName`
+- `storageKey`
+- `contentType`
+- `sizeBytes`
+- `tags`
+- `createdAt`
+- `updatedAt`
+
+Notes:
+
+- document tags are stored as a short JSON string array
+- binary files live in the storage adapter, not in the database
+
+### ProjectPhoto
+
+Purpose:
+
+- stores uploaded project photos as a dedicated evidence workflow
+- keeps captions and optional room or phase tags visible in project context
+
+Key fields:
+
+- `projectId`
+- `createdById`
+- `originalName`
+- `storageKey`
+- `contentType`
+- `sizeBytes`
+- `caption`
+- `roomTag`
+- `phaseTag`
+- `takenOn`
+- `uploadedAt`
+- `updatedAt`
+
+Notes:
+
+- `takenOn` captures when the photo was taken, while `uploadedAt` captures when it entered ScopeHouse
+- photos use the same storage adapter pattern as documents but remain a separate model and UI flow
 
 ### SchedulePhase
 

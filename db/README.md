@@ -37,6 +37,8 @@ The initial schema is intentionally narrow:
 - `Decision`
 - `BudgetCategory`
 - `BudgetLine`
+- `ProjectDocument`
+- `ProjectPhoto`
 - `SchedulePhase`
 - `ScheduleMilestone`
 
@@ -77,3 +79,9 @@ The schedule foundation now adds:
 - ordered project phases with optional target start and finish dates
 - phase-linked milestones with optional target dates
 - string-based day-level schedule fields to avoid timezone drift
+
+The document and photo foundation now adds:
+
+- document metadata with uploader linkage, size, type, and tags
+- photo metadata with caption, room tag, phase tag, taken date, and upload date
+- local storage-backed secure retrieval paths for project assets

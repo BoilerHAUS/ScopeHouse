@@ -1,19 +1,29 @@
-import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
+import { requireCurrentUser } from "@/server/auth/session";
+import { PhotoLog } from "@/features/photos/components/photo-log";
+import { listProjectPhotosForUser } from "@/features/photos/queries/list-project-photos";
 
-export default function ProjectPhotosPage() {
+type ProjectPhotosPageProps = {
+  params: Promise<{
+    projectId: string;
+  }>;
+};
+
+export default async function ProjectPhotosPage({
+  params,
+}: ProjectPhotosPageProps) {
+  const user = await requireCurrentUser();
+  const { projectId } = await params;
+  const photos = await listProjectPhotosForUser(projectId, user.id);
+
+  if (!photos) {
+    notFound();
+  }
+
   return (
     <PageContainer>
-      <FeaturePlaceholder
-        eyebrow="Photos"
-        title="Project photo log"
-        description="This route is reserved for photo uploads, captions, timestamps, and optional room or phase tagging."
-        points={[
-          "Keep the photo workflow distinct from generic document storage.",
-          "Support practical jobsite and planning evidence first.",
-          "Preserve upload metadata and project context cleanly.",
-        ]}
-      />
+      <PhotoLog projectId={projectId} photos={photos} />
     </PageContainer>
   );
 }

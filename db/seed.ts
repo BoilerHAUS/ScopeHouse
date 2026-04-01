@@ -10,6 +10,7 @@ import {
   WorkspaceRole,
 } from "@prisma/client";
 import { hash } from "bcryptjs";
+import { writeProjectFileBuffer } from "@/server/storage/project-files";
 
 loadEnv();
 loadEnv({ path: ".env.local", override: true });
@@ -310,6 +311,81 @@ async function main() {
       notes: "Needed before cabinet shop drawings can be finalized.",
       targetDate: "2026-04-18",
       itemOrder: 0,
+    },
+  });
+
+  const documentStorageKey =
+    "project-files/documents/scopehouse-demo-project/demo-kitchen-notes.txt";
+  const photoStorageKey =
+    "project-files/photos/scopehouse-demo-project/demo-existing-conditions.png";
+  const documentContents = [
+    "ScopeHouse demo planning notes",
+    "",
+    "- Confirm appliance selections before cabinetry pricing",
+    "- Verify pantry shelving depth against circulation",
+    "- Keep one side of the kitchen usable during construction",
+  ].join("\n");
+  const photoBytes = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9sXnVfQAAAAASUVORK5CYII=",
+    "base64",
+  );
+
+  await writeProjectFileBuffer(
+    documentStorageKey,
+    new TextEncoder().encode(documentContents),
+  );
+
+  await writeProjectFileBuffer(photoStorageKey, photoBytes);
+
+  await prisma.projectDocument.upsert({
+    where: {
+      storageKey: documentStorageKey,
+    },
+    update: {
+      projectId: project.id,
+      createdById: user.id,
+      originalName: "demo-kitchen-notes.txt",
+      contentType: "text/plain",
+      sizeBytes: new TextEncoder().encode(documentContents).byteLength,
+      tags: ["planning", "notes", "kitchen"],
+    },
+    create: {
+      projectId: project.id,
+      createdById: user.id,
+      originalName: "demo-kitchen-notes.txt",
+      storageKey: documentStorageKey,
+      contentType: "text/plain",
+      sizeBytes: new TextEncoder().encode(documentContents).byteLength,
+      tags: ["planning", "notes", "kitchen"],
+    },
+  });
+
+  await prisma.projectPhoto.upsert({
+    where: {
+      storageKey: photoStorageKey,
+    },
+    update: {
+      projectId: project.id,
+      createdById: user.id,
+      originalName: "demo-existing-conditions.png",
+      contentType: "image/png",
+      sizeBytes: photoBytes.byteLength,
+      caption: "Existing cabinet wall before scope lock.",
+      roomTag: "Kitchen",
+      phaseTag: "Existing conditions",
+      takenOn: "2026-03-20",
+    },
+    create: {
+      projectId: project.id,
+      createdById: user.id,
+      originalName: "demo-existing-conditions.png",
+      storageKey: photoStorageKey,
+      contentType: "image/png",
+      sizeBytes: photoBytes.byteLength,
+      caption: "Existing cabinet wall before scope lock.",
+      roomTag: "Kitchen",
+      phaseTag: "Existing conditions",
+      takenOn: "2026-03-20",
     },
   });
 }

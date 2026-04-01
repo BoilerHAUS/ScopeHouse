@@ -140,3 +140,6 @@ vite.config.ts.timestamp-*
 
 # Prisma generated client
 db/generated/
+
+# Local uploaded project files
+.storage/
