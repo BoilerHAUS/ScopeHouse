@@ -146,6 +146,8 @@ model Project {
   budgetLines   BudgetLine[]
   decisions     Decision[]
   intake        ProjectIntake?
+  scheduleMilestones ScheduleMilestone[]
+  schedulePhases SchedulePhase[]
   scopeDrafts   ScopeDraft[]
   scopeItems    ScopeItem[]
   createdBy     User           @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
@@ -315,6 +317,39 @@ model BudgetLine {
 
   @@index([projectId, categoryId, itemOrder])
   @@index([scopeItemId])
+}
+
+model SchedulePhase {
+  id              String              @id @default(cuid())
+  projectId       String
+  name            String
+  notes           String?
+  targetStartDate String?
+  targetEndDate   String?
+  itemOrder       Int
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  milestones      ScheduleMilestone[]
+  project         Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, itemOrder])
+}
+
+model ScheduleMilestone {
+  id          String        @id @default(cuid())
+  projectId   String
+  phaseId     String
+  label       String
+  notes       String?
+  targetDate  String?
+  itemOrder   Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  phase       SchedulePhase @relation(fields: [phaseId], references: [id], onDelete: Cascade)
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, phaseId, itemOrder])
+  @@index([phaseId, itemOrder])
 }
 
 model Session {

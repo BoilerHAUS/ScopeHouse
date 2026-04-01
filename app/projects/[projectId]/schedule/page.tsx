@@ -1,19 +1,29 @@
-import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
+import { requireCurrentUser } from "@/server/auth/session";
+import { SchedulePlanner } from "@/features/schedule/components/schedule-planner";
+import { getProjectScheduleForUser } from "@/features/schedule/queries/get-project-schedule";
 
-export default function ProjectSchedulePage() {
+type ProjectSchedulePageProps = {
+  params: Promise<{
+    projectId: string;
+  }>;
+};
+
+export default async function ProjectSchedulePage({
+  params,
+}: ProjectSchedulePageProps) {
+  const user = await requireCurrentUser();
+  const { projectId } = await params;
+  const schedule = await getProjectScheduleForUser(projectId, user.id);
+
+  if (!schedule) {
+    notFound();
+  }
+
   return (
     <PageContainer>
-      <FeaturePlaceholder
-        eyebrow="Schedule"
-        title="Schedule planner"
-        description="The MVP schedule is lightweight. It should support sequencing and visibility without becoming a heavy CPM tool."
-        points={[
-          "Model phases and milestones first.",
-          "Prefer practical visibility over dense calendar UI.",
-          "Keep schedule rules in features/schedule, not in route components.",
-        ]}
-      />
+      <SchedulePlanner projectId={projectId} schedule={schedule} />
     </PageContainer>
   );
 }

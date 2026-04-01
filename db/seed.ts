@@ -243,6 +243,75 @@ async function main() {
       itemOrder: 0,
     },
   });
+
+  const planningPhase = await prisma.schedulePhase.upsert({
+    where: {
+      id: "scopehouse-demo-schedule-phase-planning",
+    },
+    update: {
+      projectId: project.id,
+      name: "Planning and selections",
+      notes: "Finalize key owner-facing selections before contractor pricing.",
+      targetStartDate: "2026-04-01",
+      targetEndDate: "2026-04-30",
+      itemOrder: 0,
+    },
+    create: {
+      id: "scopehouse-demo-schedule-phase-planning",
+      projectId: project.id,
+      name: "Planning and selections",
+      notes: "Finalize key owner-facing selections before contractor pricing.",
+      targetStartDate: "2026-04-01",
+      targetEndDate: "2026-04-30",
+      itemOrder: 0,
+    },
+  });
+
+  await prisma.schedulePhase.upsert({
+    where: {
+      id: "scopehouse-demo-schedule-phase-construction",
+    },
+    update: {
+      projectId: project.id,
+      name: "Construction",
+      notes: "Coordinate demolition, install, and finish sequencing.",
+      targetStartDate: "2026-05-06",
+      targetEndDate: "2026-07-10",
+      itemOrder: 1,
+    },
+    create: {
+      id: "scopehouse-demo-schedule-phase-construction",
+      projectId: project.id,
+      name: "Construction",
+      notes: "Coordinate demolition, install, and finish sequencing.",
+      targetStartDate: "2026-05-06",
+      targetEndDate: "2026-07-10",
+      itemOrder: 1,
+    },
+  });
+
+  await prisma.scheduleMilestone.upsert({
+    where: {
+      id: "scopehouse-demo-milestone-appliances",
+    },
+    update: {
+      projectId: project.id,
+      phaseId: planningPhase.id,
+      label: "Lock appliance selections",
+      notes: "Needed before cabinet shop drawings can be finalized.",
+      targetDate: "2026-04-18",
+      itemOrder: 0,
+    },
+    create: {
+      id: "scopehouse-demo-milestone-appliances",
+      projectId: project.id,
+      phaseId: planningPhase.id,
+      label: "Lock appliance selections",
+      notes: "Needed before cabinet shop drawings can be finalized.",
+      targetDate: "2026-04-18",
+      itemOrder: 0,
+    },
+  });
 }
 
 main()

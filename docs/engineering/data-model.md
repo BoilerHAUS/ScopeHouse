@@ -80,6 +80,11 @@ Relations:
 - belongs to one creator `User`
 - has zero or one `ProjectIntake`
 - has many `ActivityLog` entries
+- has many `BudgetCategory`
+- has many `BudgetLine`
+- has many `Decision`
+- has many `SchedulePhase`
+- has many `ScheduleMilestone`
 - has many `ScopeDraft`
 - has many `ScopeItem`
 - has many `AiGeneration`
@@ -121,11 +126,6 @@ Indexes:
 
 ## Next Likely Model Additions
 
-- `ScopeItem`
-- `Decision`
-- `BudgetCategory`
-- `BudgetLine`
-- `Milestone`
 - `Document`
 - `Photo`
 - `ChangeOrder`
@@ -319,3 +319,49 @@ Notes:
 
 - currency is stored in integer cents to avoid rounding drift
 - project planning totals prefer `actual` then `quoted` then `allowance` then `estimate`
+
+### SchedulePhase
+
+Purpose:
+
+- stores the ordered top-level schedule structure for a project
+- supports simple date-range planning without introducing gantt complexity
+
+Key fields:
+
+- `projectId`
+- `name`
+- `notes`
+- `targetStartDate`
+- `targetEndDate`
+- `itemOrder`
+- `createdAt`
+- `updatedAt`
+
+Notes:
+
+- target dates are stored as `YYYY-MM-DD` strings to avoid timezone drift for day-level planning
+- `itemOrder` controls the visible sequence in the planner UI
+
+### ScheduleMilestone
+
+Purpose:
+
+- stores dated checkpoints inside a schedule phase
+- gives the MVP a lightweight way to surface deadlines and decision gates
+
+Key fields:
+
+- `projectId`
+- `phaseId`
+- `label`
+- `notes`
+- `targetDate`
+- `itemOrder`
+- `createdAt`
+- `updatedAt`
+
+Notes:
+
+- milestones belong to both a project and a parent `SchedulePhase`
+- `itemOrder` is scoped to the phase so milestone sequencing stays simple

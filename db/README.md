@@ -37,6 +37,8 @@ The initial schema is intentionally narrow:
 - `Decision`
 - `BudgetCategory`
 - `BudgetLine`
+- `SchedulePhase`
+- `ScheduleMilestone`
 
 The project model now includes:
 
@@ -69,3 +71,9 @@ The budget foundation now adds:
 - budget categories with explicit ordering
 - planning line items with estimate, allowance, quote, and actual amounts
 - cent-based currency storage for deterministic calculations
+
+The schedule foundation now adds:
+
+- ordered project phases with optional target start and finish dates
+- phase-linked milestones with optional target dates
+- string-based day-level schedule fields to avoid timezone drift
