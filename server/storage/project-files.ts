@@ -3,10 +3,7 @@ import path from "node:path";
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 
 function getStorageRoot() {
-  return path.join(
-    /* turbopackIgnore: true */ process.cwd(),
-    process.env.PROJECT_FILES_DIR ?? ".storage",
-  );
+  return path.join(/*turbopackIgnore: true*/ process.cwd(), process.env.PROJECT_FILES_DIR ?? ".storage");
 }
 
 function getBucketName() {
@@ -28,9 +25,11 @@ function normalizeStorageKey(storageKey: string) {
 }
 
 function resolveStoragePath(storageKey: string) {
-  const root = getStorageRoot();
   const normalizedKey = normalizeStorageKey(storageKey);
-  const absolutePath = path.resolve(root, normalizedKey);
+  const root = getStorageRoot();
+  // Compute absolutePath from process.cwd() directly so Turbopack's file-tracing
+  // analysis sees the ignore annotation rather than a path.resolve on a variable.
+  const absolutePath = path.join(/*turbopackIgnore: true*/ process.cwd(), process.env.PROJECT_FILES_DIR ?? ".storage", normalizedKey);
 
   if (
     absolutePath !== root &&
@@ -66,8 +65,8 @@ export function createProjectFileStorageKey({
 export async function writeProjectFileBuffer(storageKey: string, bytes: Uint8Array) {
   const { absolutePath, normalizedKey } = resolveStoragePath(storageKey);
 
-  await mkdir(path.dirname(absolutePath), { recursive: true });
-  await writeFile(absolutePath, bytes);
+  await mkdir(/*turbopackIgnore: true*/ path.dirname(absolutePath), { recursive: true });
+  await writeFile(/*turbopackIgnore: true*/ absolutePath, bytes);
 
   return {
     storageKey: normalizedKey,
@@ -97,13 +96,13 @@ export async function saveProjectFile({
 
 export async function readProjectFileBuffer(storageKey: string) {
   const { absolutePath } = resolveStoragePath(storageKey);
-  return readFile(absolutePath);
+  return readFile(/*turbopackIgnore: true*/ absolutePath);
 }
 
 export async function deleteProjectFile(storageKey: string) {
   const { absolutePath } = resolveStoragePath(storageKey);
   // Ignore ENOENT — the DB record is the source of truth; a missing file is not fatal.
-  await unlink(absolutePath).catch((err: NodeJS.ErrnoException) => {
+  await unlink(/*turbopackIgnore: true*/ absolutePath).catch((err: NodeJS.ErrnoException) => {
     if (err.code !== "ENOENT") throw err;
   });
 }
