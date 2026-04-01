@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Route } from "next";
 import { PageContainer } from "@/components/layout/page-container";
 import { requireCurrentUser } from "@/server/auth/session";
+import { listProjectChangeOrdersForUser } from "@/features/change-orders/queries/list-project-change-orders";
 import { listProjectDecisionsForUser } from "@/features/decisions/queries/list-project-decisions";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import { getProjectIntakeForUser } from "@/features/intake/queries/get-project-intake";
@@ -45,14 +46,15 @@ export default async function ProjectWorkspacePage({
 }: ProjectWorkspacePageProps) {
   const user = await requireCurrentUser();
   const { projectId } = await params;
-  const [project, intakeRecord, activity, decisions] = await Promise.all([
+  const [project, intakeRecord, activity, decisions, changeOrders] = await Promise.all([
     getProjectForUser(projectId, user.id),
     getProjectIntakeForUser(projectId, user.id),
     listProjectActivityForUser(projectId, user.id),
     listProjectDecisionsForUser(projectId, user.id),
+    listProjectChangeOrdersForUser(projectId, user.id),
   ]);
 
-  if (!project) {
+  if (!project || !changeOrders) {
     notFound();
   }
 
@@ -60,6 +62,7 @@ export default async function ProjectWorkspacePage({
   const intakeStarted = Boolean(intakeRecord?.intake);
   const scopeReady = intakeCompleted;
   const hasDecisions = decisions.length > 0;
+  const hasChangeOrders = changeOrders.length > 0;
 
   const overviewCards: OverviewCardProps[] = [
     {
@@ -95,13 +98,21 @@ export default async function ProjectWorkspacePage({
       cta: "Open decisions",
     },
     {
+      href: `/projects/${projectId}/change-orders` as Route,
+      title: "Changes",
+      status: hasChangeOrders ? "Change log started" : "No change orders yet",
+      summary:
+        "Track scope, budget, and timing changes in one place with impact notes that stay visible during planning.",
+      cta: "Open changes",
+    },
+    {
       href: `/projects/${projectId}/export` as Route,
       title: "Export readiness",
       status: intakeCompleted
         ? "Intake ready, other modules pending"
         : "Not ready for export yet",
       summary: intakeCompleted
-        ? "A summary export can start taking shape once scope, decisions, and supporting evidence are added."
+        ? "A summary export can start taking shape once scope, decisions, changes, and supporting evidence are added."
         : "Exports should stay thin until the intake baseline is complete and reviewable.",
       cta: "Review export route",
     },

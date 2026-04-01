@@ -84,6 +84,13 @@ enum DecisionStatus {
   deferred
 }
 
+enum ChangeOrderStatus {
+  proposed
+  approved
+  rejected
+  implemented
+}
+
 enum BudgetCategoryStatus {
   draft
   active
@@ -146,6 +153,7 @@ model Project {
   aiGenerations AiGeneration[]
   budgetCategories BudgetCategory[]
   budgetLines   BudgetLine[]
+  changeOrders  ChangeOrder[]
   decisions     Decision[]
   documents     ProjectDocument[]
   intake        ProjectIntake?
@@ -395,6 +403,25 @@ model ProjectPhoto {
   @@index([createdById])
   @@index([roomTag])
   @@index([phaseTag])
+}
+
+model ChangeOrder {
+  id               String            @id @default(cuid())
+  projectId        String
+  title            String
+  description      String
+  status           ChangeOrderStatus @default(proposed)
+  requestedAt      DateTime
+  impactSummary    String
+  budgetReference  String?
+  scheduleReference String?
+  notes            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  project          Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, requestedAt])
+  @@index([status])
 }
 
 model Session {

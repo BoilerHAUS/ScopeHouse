@@ -193,6 +193,39 @@ async function main() {
     },
   });
 
+  await prisma.changeOrder.upsert({
+    where: {
+      id: "scopehouse-demo-change-order-fridge",
+    },
+    update: {
+      projectId: project.id,
+      title: "Add beverage fridge allowance",
+      description:
+        "Owners requested a beverage fridge in the pantry run after the first cabinetry budget review.",
+      status: "proposed",
+      requestedAt: new Date("2026-03-22T12:00:00.000Z"),
+      impactSummary:
+        "Adds appliance and millwork scope, increases cabinetry coordination, and may affect pantry layout.",
+      budgetReference: "Appliance allowance +$2,400 and cabinet revision pending",
+      scheduleReference: "May add one week if cabinetry drawings need revision",
+      notes: "Hold until refrigeration decision is confirmed.",
+    },
+    create: {
+      id: "scopehouse-demo-change-order-fridge",
+      projectId: project.id,
+      title: "Add beverage fridge allowance",
+      description:
+        "Owners requested a beverage fridge in the pantry run after the first cabinetry budget review.",
+      status: "proposed",
+      requestedAt: new Date("2026-03-22T12:00:00.000Z"),
+      impactSummary:
+        "Adds appliance and millwork scope, increases cabinetry coordination, and may affect pantry layout.",
+      budgetReference: "Appliance allowance +$2,400 and cabinet revision pending",
+      scheduleReference: "May add one week if cabinetry drawings need revision",
+      notes: "Hold until refrigeration decision is confirmed.",
+    },
+  });
+
   const cabinetryCategory = await prisma.budgetCategory.upsert({
     where: {
       id: "scopehouse-demo-budget-category-cabinetry",

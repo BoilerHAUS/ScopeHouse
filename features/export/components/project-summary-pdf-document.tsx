@@ -100,7 +100,8 @@ export function ProjectSummaryPdfDocument({
 }: {
   summary: ProjectExportSummary;
 }) {
-  const { project, intake, scope, decisions, readiness } = summary;
+  const { project, intake, scope, decisions, changeOrders, aiSummary, readiness } =
+    summary;
 
   return (
     <Document title={`${project.title} Summary`}>
@@ -125,6 +126,57 @@ export function ProjectSummaryPdfDocument({
             <Text style={styles.metaLabel}>Scope items</Text>
             <Text style={styles.metaValue}>{String(scope.itemCount)}</Text>
           </View>
+          <View style={styles.metaCard}>
+            <Text style={styles.metaLabel}>Changes logged</Text>
+            <Text style={styles.metaValue}>{String(changeOrders.length)}</Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>AI project summary</Text>
+          {aiSummary ? (
+            <>
+              <Text style={styles.body}>{aiSummary.output.summary}</Text>
+              <View style={styles.block}>
+                <Text style={styles.smallLabel}>Progress</Text>
+                {aiSummary.output.progress.length > 0 ? (
+                  aiSummary.output.progress.map((item) => (
+                    <Text key={`progress-${item}`} style={styles.listItem}>
+                      • {item}
+                    </Text>
+                  ))
+                ) : (
+                  <Text style={styles.body}>No progress items recorded.</Text>
+                )}
+              </View>
+              <View style={styles.block}>
+                <Text style={styles.smallLabel}>Blockers</Text>
+                {aiSummary.output.blockers.length > 0 ? (
+                  aiSummary.output.blockers.map((item) => (
+                    <Text key={`blocker-${item}`} style={styles.listItem}>
+                      • {item}
+                    </Text>
+                  ))
+                ) : (
+                  <Text style={styles.body}>No blockers recorded.</Text>
+                )}
+              </View>
+              <View style={styles.block}>
+                <Text style={styles.smallLabel}>Next actions</Text>
+                {aiSummary.output.nextActions.length > 0 ? (
+                  aiSummary.output.nextActions.map((item) => (
+                    <Text key={`next-${item}`} style={styles.listItem}>
+                      • {item}
+                    </Text>
+                  ))
+                ) : (
+                  <Text style={styles.body}>No next actions recorded.</Text>
+                )}
+              </View>
+            </>
+          ) : (
+            <Text style={styles.body}>No AI summary has been generated yet.</Text>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -218,6 +270,36 @@ export function ProjectSummaryPdfDocument({
             ))
           ) : (
             <Text style={styles.body}>No decisions have been logged yet.</Text>
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Change orders</Text>
+          {changeOrders.length > 0 ? (
+            changeOrders.map((changeOrder) => (
+              <View key={changeOrder.id} style={styles.block}>
+                <Text style={styles.body}>
+                  {changeOrder.requestedAt.toLocaleDateString()} ·{" "}
+                  {formatLabel(changeOrder.status)} · {changeOrder.title}
+                </Text>
+                <Text style={styles.body}>{changeOrder.description}</Text>
+                <Text style={styles.body}>
+                  Impact: {changeOrder.impactSummary}
+                </Text>
+                {changeOrder.budgetReference ? (
+                  <Text style={styles.body}>
+                    Budget: {changeOrder.budgetReference}
+                  </Text>
+                ) : null}
+                {changeOrder.scheduleReference ? (
+                  <Text style={styles.body}>
+                    Schedule: {changeOrder.scheduleReference}
+                  </Text>
+                ) : null}
+              </View>
+            ))
+          ) : (
+            <Text style={styles.body}>No change orders have been logged yet.</Text>
           )}
         </View>
       </Page>

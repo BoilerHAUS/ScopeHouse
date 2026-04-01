@@ -39,6 +39,7 @@ The initial schema is intentionally narrow:
 - `BudgetLine`
 - `ProjectDocument`
 - `ProjectPhoto`
+- `ChangeOrder`
 - `SchedulePhase`
 - `ScheduleMilestone`
 
@@ -85,3 +86,8 @@ The document and photo foundation now adds:
 - document metadata with uploader linkage, size, type, and tags
 - photo metadata with caption, room tag, phase tag, taken date, and upload date
 - local storage-backed secure retrieval paths for project assets
+
+The change and AI summary foundation now adds:
+
+- project-linked change orders with impact summaries and lightweight budget or schedule references
+- reusable AI project summaries sourced from intake, scope, decisions, and change orders

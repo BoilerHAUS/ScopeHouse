@@ -1,19 +1,29 @@
-import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
+import { ChangeOrderManager } from "@/features/change-orders/components/change-order-manager";
+import { listProjectChangeOrdersForUser } from "@/features/change-orders/queries/list-project-change-orders";
+import { requireCurrentUser } from "@/server/auth/session";
 
-export default function ProjectChangeOrdersPage() {
+type ProjectChangeOrdersPageProps = {
+  params: Promise<{
+    projectId: string;
+  }>;
+};
+
+export default async function ProjectChangeOrdersPage({
+  params,
+}: ProjectChangeOrdersPageProps) {
+  const user = await requireCurrentUser();
+  const { projectId } = await params;
+  const changeOrders = await listProjectChangeOrdersForUser(projectId, user.id);
+
+  if (changeOrders === null) {
+    notFound();
+  }
+
   return (
     <PageContainer>
-      <FeaturePlaceholder
-        eyebrow="Change Orders"
-        title="Change tracking"
-        description="Use this route for recording scope, budget, and schedule changes with clear impact context."
-        points={[
-          "Track changes without drifting into full contract administration.",
-          "Keep linked budget or schedule impacts visible.",
-          "Make review and auditability straightforward.",
-        ]}
-      />
+      <ChangeOrderManager projectId={projectId} changeOrders={changeOrders} />
     </PageContainer>
   );
 }

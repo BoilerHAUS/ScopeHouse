@@ -1,4 +1,6 @@
 import { cache } from "react";
+import { getLatestProjectProgressSummaryForUser } from "@/features/ai/queries/get-latest-project-progress-summary";
+import { listProjectChangeOrdersForUser } from "@/features/change-orders/queries/list-project-change-orders";
 import { listProjectDecisionsForUser } from "@/features/decisions/queries/list-project-decisions";
 import { getProjectIntakeForUser } from "@/features/intake/queries/get-project-intake";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
@@ -17,14 +19,17 @@ function countScopeItems(
 
 export const getProjectExportSummaryForUser = cache(
   async (projectId: string, userId: string) => {
-    const [project, intakeRecord, scope, decisions] = await Promise.all([
-      getProjectForUser(projectId, userId),
-      getProjectIntakeForUser(projectId, userId),
-      getProjectScopeForUser(projectId, userId),
-      listProjectDecisionsForUser(projectId, userId),
-    ]);
+    const [project, intakeRecord, scope, decisions, changeOrders, aiSummary] =
+      await Promise.all([
+        getProjectForUser(projectId, userId),
+        getProjectIntakeForUser(projectId, userId),
+        getProjectScopeForUser(projectId, userId),
+        listProjectDecisionsForUser(projectId, userId),
+        listProjectChangeOrdersForUser(projectId, userId),
+        getLatestProjectProgressSummaryForUser(projectId, userId),
+      ]);
 
-    if (!project || !intakeRecord) {
+    if (!project || !intakeRecord || !changeOrders) {
       return null;
     }
 
@@ -51,10 +56,13 @@ export const getProjectExportSummaryForUser = cache(
         itemCount: scopeItemCount,
       },
       decisions,
+      changeOrders,
+      aiSummary,
       readiness: {
         intakeReady: Boolean(intake?.completedAt),
         scopeReady: scopeItemCount > 0,
         decisionsReady: decisions.length > 0,
+        changeOrdersReady: changeOrders.length > 0,
       },
     };
   },

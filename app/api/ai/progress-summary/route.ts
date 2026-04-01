@@ -1,13 +1,62 @@
 import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/server/auth/session";
+import { generateProjectProgressSummaryForUser } from "@/features/ai/services/generate-project-progress-summary";
 
-export async function POST() {
-  return NextResponse.json(
-    {
+type ProgressSummaryRouteBody = {
+  projectId?: string;
+};
+
+export async function POST(request: Request) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return NextResponse.json(
+      {
+        workflow: "progress-summary",
+        status: "unauthorized",
+        message: "Sign in to generate a project summary.",
+      },
+      { status: 401 },
+    );
+  }
+
+  const body = (await request.json()) as ProgressSummaryRouteBody;
+
+  if (!body.projectId) {
+    return NextResponse.json(
+      {
+        workflow: "progress-summary",
+        status: "invalid-request",
+        message: "Provide a projectId.",
+      },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const summary = await generateProjectProgressSummaryForUser(body.projectId, user.id);
+
+    return NextResponse.json({
       workflow: "progress-summary",
-      status: "not-implemented",
-      message:
-        "Wire this route to prompts/progress-summary after note ingestion and decision/change aggregation exist.",
-    },
-    { status: 501 },
-  );
+      status: "completed",
+      summary: {
+        ...summary.output,
+        generationId: summary.generationId,
+        model: summary.model,
+        promptVersion: summary.promptVersion,
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        workflow: "progress-summary",
+        status: "failed",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unable to generate the project summary.",
+      },
+      { status: 400 },
+    );
+  }
 }

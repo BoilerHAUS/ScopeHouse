@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { Button } from "@/components/ui/button";
+import { ProjectProgressSummaryPanel } from "@/features/ai/components/project-progress-summary-panel";
 import { PrintProjectSummaryButton } from "@/features/export/components/print-project-summary-button";
 import type { getProjectExportSummaryForUser } from "@/features/export/queries/get-project-export-summary";
 
@@ -47,7 +48,8 @@ export function ProjectSummaryExportView({
   projectId,
   summary,
 }: ProjectSummaryExportViewProps) {
-  const { project, intake, scope, decisions, readiness } = summary;
+  const { project, intake, scope, decisions, changeOrders, aiSummary, readiness } =
+    summary;
 
   return (
     <div className="space-y-6">
@@ -74,7 +76,7 @@ export function ProjectSummaryExportView({
           </div>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {[
             {
               label: "Project status",
@@ -92,6 +94,10 @@ export function ProjectSummaryExportView({
               label: "Decisions logged",
               value: String(decisions.length),
             },
+            {
+              label: "Changes logged",
+              value: String(changeOrders.length),
+            },
           ].map((item) => (
             <div
               key={item.label}
@@ -107,6 +113,8 @@ export function ProjectSummaryExportView({
           ))}
         </div>
       </section>
+
+      <ProjectProgressSummaryPanel projectId={projectId} latestSummary={aiSummary} />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_360px]">
         <div className="space-y-6">
@@ -271,6 +279,56 @@ export function ProjectSummaryExportView({
               </EmptyState>
             )}
           </ExportSection>
+
+          <ExportSection title="Change orders">
+            {changeOrders.length > 0 ? (
+              <div className="space-y-4">
+                {changeOrders.map((changeOrder) => (
+                  <div
+                    key={changeOrder.id}
+                    className="rounded-[1.25rem] border border-stone-200 px-4 py-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="rounded-full bg-stone-100 px-3 py-1 text-xs capitalize text-stone-700">
+                        {formatLabel(changeOrder.status)}
+                      </span>
+                      <span className="text-xs text-stone-500">
+                        {changeOrder.requestedAt.toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm font-medium text-stone-900">
+                      {changeOrder.title}
+                    </p>
+                    <p className="mt-2 text-sm leading-7 text-stone-700">
+                      {changeOrder.description}
+                    </p>
+                    <p className="mt-2 text-sm leading-7 text-stone-700">
+                      Impact: {changeOrder.impactSummary}
+                    </p>
+                    {changeOrder.budgetReference ? (
+                      <p className="mt-2 text-sm leading-7 text-stone-700">
+                        Budget reference: {changeOrder.budgetReference}
+                      </p>
+                    ) : null}
+                    {changeOrder.scheduleReference ? (
+                      <p className="mt-2 text-sm leading-7 text-stone-700">
+                        Schedule reference: {changeOrder.scheduleReference}
+                      </p>
+                    ) : null}
+                    {changeOrder.notes ? (
+                      <p className="mt-2 text-sm leading-7 text-stone-700">
+                        {changeOrder.notes}
+                      </p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState>
+                No change orders have been logged yet.
+              </EmptyState>
+            )}
+          </ExportSection>
         </div>
 
         <div className="space-y-6">
@@ -282,6 +340,10 @@ export function ProjectSummaryExportView({
               <p>Scope baseline: {readiness.scopeReady ? "ready" : "missing"}</p>
               <p>
                 Decision log: {readiness.decisionsReady ? "started" : "not started"}
+              </p>
+              <p>
+                Change log:{" "}
+                {readiness.changeOrdersReady ? "started" : "not started"}
               </p>
             </div>
           </ExportSection>

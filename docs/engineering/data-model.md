@@ -128,7 +128,7 @@ Indexes:
 
 ## Next Likely Model Additions
 
-- `ChangeOrder`
+- no additional MVP entities are required before beta work resumes
 
 ## Additional MVP Entities
 
@@ -370,6 +370,32 @@ Notes:
 
 - `takenOn` captures when the photo was taken, while `uploadedAt` captures when it entered ScopeHouse
 - photos use the same storage adapter pattern as documents but remain a separate model and UI flow
+
+### ChangeOrder
+
+Purpose:
+
+- records project changes that affect scope, budget, or timing
+- keeps impact context reviewable without turning the MVP into contract administration software
+
+Key fields:
+
+- `projectId`
+- `title`
+- `description`
+- `status`
+- `requestedAt`
+- `impactSummary`
+- `budgetReference`
+- `scheduleReference`
+- `notes`
+- `createdAt`
+- `updatedAt`
+
+Notes:
+
+- change orders are project-linked records with explicit status tracking
+- budget and schedule references remain lightweight text links for MVP speed
 
 ### SchedulePhase
 
