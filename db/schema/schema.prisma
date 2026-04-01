@@ -30,26 +30,44 @@ enum ProjectStatus {
   closeout
 }
 
+enum ContractorInvolvement {
+  undecided
+  self_managed
+  hiring_gc
+  selected_gc
+  design_build
+}
+
+enum ActivityEventType {
+  project_created
+  project_updated
+  intake_started
+  intake_saved
+  intake_completed
+}
+
 model User {
-  id           String            @id @default(cuid())
-  email        String            @unique
-  name         String?
-  passwordHash String
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  memberships  WorkspaceMember[]
-  sessions     Session[]
-  createdProjects Project[]      @relation("ProjectCreator")
+  id              String            @id @default(cuid())
+  email           String            @unique
+  name            String?
+  passwordHash    String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  memberships     WorkspaceMember[]
+  sessions        Session[]
+  createdProjects Project[]         @relation("ProjectCreator")
+  activityLogs    ActivityLog[]     @relation("ActivityActor")
 }
 
 model Workspace {
-  id          String            @id @default(cuid())
-  name        String
-  slug        String            @unique
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  memberships WorkspaceMember[]
-  projects    Project[]
+  id           String            @id @default(cuid())
+  name         String
+  slug         String            @unique
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  memberships  WorkspaceMember[]
+  projects     Project[]
+  activityLogs ActivityLog[]
 }
 
 model WorkspaceMember {
@@ -68,24 +86,65 @@ model WorkspaceMember {
 }
 
 model Project {
-  id            String        @id @default(cuid())
+  id            String         @id @default(cuid())
   workspaceId   String
   createdById   String
   title         String
   projectType   ProjectType
   locationLabel String?
   goals         String?
-  status        ProjectStatus @default(draft)
+  status        ProjectStatus  @default(draft)
   archivedAt    DateTime?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  createdBy     User          @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
-  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  activityLogs  ActivityLog[]
+  intake        ProjectIntake?
+  createdBy     User           @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
   @@index([createdById])
   @@index([status])
   @@index([archivedAt])
+}
+
+model ProjectIntake {
+  id                    String                 @id @default(cuid())
+  projectId             String                 @unique
+  renovationType        ProjectType?
+  rooms                 Json?
+  goals                 String?
+  priorities            Json?
+  timingExpectation     String?
+  budgetRange           String?
+  constraints           Json?
+  contractorInvolvement ContractorInvolvement?
+  notes                 String?
+  completedAt           DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  project               Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([completedAt])
+}
+
+model ActivityLog {
+  id         String            @id @default(cuid())
+  projectId  String
+  workspaceId String
+  actorId    String?
+  eventType  ActivityEventType
+  summary    String
+  metadata   Json?
+  createdAt  DateTime          @default(now())
+  actor      User?             @relation("ActivityActor", fields: [actorId], references: [id], onDelete: SetNull)
+  project    Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  workspace  Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@index([workspaceId, createdAt])
+  @@index([actorId])
+  @@index([eventType])
 }
 
 model Session {

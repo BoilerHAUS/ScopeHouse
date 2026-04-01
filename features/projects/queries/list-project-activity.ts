@@ -2,31 +2,34 @@ import { cache } from "react";
 import { db } from "@/server/db/client";
 import { listUserWorkspaceIds } from "@/server/permissions/workspace";
 
-export const getProjectForUser = cache(
+export const listProjectActivityForUser = cache(
   async (projectId: string, userId: string) => {
     const workspaceIds = await listUserWorkspaceIds(userId);
 
     if (workspaceIds.length === 0) {
-      return null;
+      return [];
     }
 
-    return db.project.findFirst({
+    return db.activityLog.findMany({
       where: {
-        id: projectId,
+        projectId,
         workspaceId: {
           in: workspaceIds,
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
       select: {
         id: true,
-        workspaceId: true,
-        title: true,
-        projectType: true,
-        locationLabel: true,
-        goals: true,
-        status: true,
+        eventType: true,
+        summary: true,
         createdAt: true,
-        updatedAt: true,
+        actor: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
   },

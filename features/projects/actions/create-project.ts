@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
 import { getDefaultWorkspaceIdForUser } from "@/server/permissions/workspace";
+import { logProjectActivity } from "@/server/activity/log";
 import {
   createProjectSchema,
   type CreateProjectActionState,
@@ -54,6 +55,19 @@ export async function createProjectAction(
     },
     select: {
       id: true,
+      title: true,
+      workspaceId: true,
+    },
+  });
+
+  await logProjectActivity({
+    projectId: project.id,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "project_created",
+    summary: `Created project ${project.title}.`,
+    metadata: {
+      projectType: result.data.projectType,
     },
   });
 

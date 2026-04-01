@@ -29,6 +29,8 @@ The initial schema is intentionally narrow:
 - `Workspace`
 - `WorkspaceMember`
 - `Project`
+- `ProjectIntake`
+- `ActivityLog`
 
 The project model now includes:
 
@@ -37,3 +39,9 @@ The project model now includes:
 - status enum
 - project type enum
 - archival support
+
+The intake and activity foundation now add:
+
+- one-to-one guided intake persistence
+- lightweight project activity events
+- event metadata for future summaries and reporting

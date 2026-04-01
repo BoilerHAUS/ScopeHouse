@@ -78,6 +78,8 @@ Relations:
 
 - belongs to one `Workspace`
 - belongs to one creator `User`
+- has zero or one `ProjectIntake`
+- has many `ActivityLog` entries
 
 Indexes:
 
@@ -116,7 +118,6 @@ Indexes:
 
 ## Next Likely Model Additions
 
-- `IntakeResponse`
 - `ScopeItem`
 - `Decision`
 - `BudgetCategory`
@@ -125,3 +126,59 @@ Indexes:
 - `Document`
 - `Photo`
 - `ChangeOrder`
+
+## Additional MVP Entities
+
+### ProjectIntake
+
+Purpose:
+
+- stores guided intake answers for one project
+- supports save and resume behavior before scope drafting
+
+Key fields:
+
+- `projectId`
+- `renovationType`
+- `rooms`
+- `goals`
+- `priorities`
+- `timingExpectation`
+- `budgetRange`
+- `constraints`
+- `contractorInvolvement`
+- `notes`
+- `completedAt`
+- `createdAt`
+- `updatedAt`
+
+Notes:
+
+- lists are stored as narrow JSON arrays for MVP speed
+- `completedAt` marks readiness without introducing a second status enum
+- `renovationType` can update the project shell if intake refines the initial selection
+
+### ActivityLog
+
+Purpose:
+
+- provides a lightweight, project-linked audit trail
+- supports trust, summaries, and future reporting
+
+Key fields:
+
+- `projectId`
+- `workspaceId`
+- `actorId`
+- `eventType`
+- `summary`
+- `metadata`
+- `createdAt`
+
+Event types:
+
+- `project_created`
+- `project_updated`
+- `intake_started`
+- `intake_saved`
+- `intake_completed`
