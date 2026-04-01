@@ -46,6 +46,25 @@ enum ActivityEventType {
   intake_completed
   scope_draft_generated
   scope_draft_applied
+  budget_category_saved
+  budget_category_deleted
+  budget_line_saved
+  budget_line_deleted
+  schedule_phase_saved
+  schedule_phase_deleted
+  schedule_phase_reordered
+  schedule_milestone_saved
+  schedule_milestone_deleted
+  schedule_milestone_reordered
+  document_uploaded
+  document_deleted
+  photo_uploaded
+  photo_deleted
+  decision_saved
+  decision_deleted
+  change_order_saved
+  change_order_deleted
+  progress_summary_generated
 }
 
 enum ScopeItemStatus {

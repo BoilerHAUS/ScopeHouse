@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import {
   budgetLineFormSchema,
@@ -13,6 +14,7 @@ type SaveBudgetLineActionDependencies = {
   db: typeof db;
   requireCurrentUser: typeof requireCurrentUser;
   getProjectForUser: typeof getProjectForUser;
+  logProjectActivity: typeof logProjectActivity;
   revalidatePath: typeof revalidatePath;
 };
 
@@ -20,6 +22,7 @@ const saveBudgetLineActionDependencies: SaveBudgetLineActionDependencies = {
   db,
   requireCurrentUser,
   getProjectForUser,
+  logProjectActivity,
   revalidatePath,
 };
 
@@ -96,6 +99,8 @@ export async function saveBudgetLineActionWithDependencies(
   }
 
   const lineId = result.data.lineId?.trim();
+  let savedLineId = lineId ?? "";
+  const actionLabel = lineId ? "Updated" : "Added";
 
   if (lineId) {
     const existingLine = await dependencies.db.budgetLine.findFirst({
@@ -112,7 +117,7 @@ export async function saveBudgetLineActionWithDependencies(
       return { error: "Budget line not found." };
     }
 
-    await dependencies.db.budgetLine.update({
+    const updatedLine = await dependencies.db.budgetLine.update({
       where: {
         id: lineId,
       },
@@ -126,7 +131,12 @@ export async function saveBudgetLineActionWithDependencies(
         sourceReference: result.data.sourceReference,
         notes: result.data.notes,
       },
+      select: {
+        id: true,
+      },
     });
+
+    savedLineId = updatedLine.id;
   } else {
     const lastLine = await dependencies.db.budgetLine.findFirst({
       where: {
@@ -141,7 +151,7 @@ export async function saveBudgetLineActionWithDependencies(
       },
     });
 
-    await dependencies.db.budgetLine.create({
+    const createdLine = await dependencies.db.budgetLine.create({
       data: {
         projectId,
         categoryId: result.data.categoryId,
@@ -154,8 +164,26 @@ export async function saveBudgetLineActionWithDependencies(
         notes: result.data.notes,
         itemOrder: (lastLine?.itemOrder ?? -1) + 1,
       },
+      select: {
+        id: true,
+      },
     });
+
+    savedLineId = createdLine.id;
   }
+
+  await dependencies.logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "budget_line_saved",
+    summary: `${actionLabel} budget line ${result.data.label}.`,
+    metadata: {
+      lineId: savedLineId,
+      categoryId: result.data.categoryId,
+      isUpdate: Boolean(lineId),
+    },
+  });
 
   dependencies.revalidatePath(`/projects/${projectId}`);
   dependencies.revalidatePath(`/projects/${projectId}/budget`);

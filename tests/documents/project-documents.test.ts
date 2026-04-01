@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { deleteProjectDocumentActionWithDependencies } from "@/features/documents/actions/delete-project-document";
+import { uploadProjectDocumentActionWithDependencies } from "@/features/documents/actions/upload-project-document";
 import { listProjectDocumentsForUser } from "@/features/documents/queries/list-project-documents";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
+import { logProjectActivity } from "@/server/activity/log";
 import { db } from "@/server/db/client";
 import { createFormData, createIntegrationContext } from "@/tests/support/db";
 import { createNavigationHarness } from "@/tests/support/navigation";
@@ -51,6 +53,7 @@ test("document query filters non-string tags and delete action removes authorize
       deleteProjectFile: async (storageKey) => {
         deletedKeys.push(storageKey);
       },
+      logProjectActivity,
       revalidatePath: navigation.revalidatePath,
     },
     project.id,
@@ -64,6 +67,22 @@ test("document query filters non-string tags and delete action removes authorize
     `/projects/${project.id}`,
     `/projects/${project.id}/documents`,
   ]);
+
+  const activity = await db.activityLog.findMany({
+    where: {
+      projectId: project.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      eventType: true,
+      summary: true,
+    },
+  });
+
+  assert.equal(activity[0]?.eventType, "document_deleted");
+  assert.equal(activity[0]?.summary, "Removed document kitchen-drawings.pdf.");
 
   const remainingDocument = await db.projectDocument.findUnique({
     where: {
@@ -116,6 +135,7 @@ test("deleteProjectDocumentAction ignores unauthorized deletions", async (t) => 
       deleteProjectFile: async () => {
         deleted = true;
       },
+      logProjectActivity,
       revalidatePath: () => {},
     },
     project.id,
@@ -131,4 +151,67 @@ test("deleteProjectDocumentAction ignores unauthorized deletions", async (t) => 
     },
   });
   assert.ok(persisted);
+});
+
+test("uploadProjectDocumentAction stores metadata and logs document uploads", async (t) => {
+  const integration = createIntegrationContext();
+  t.after(async () => {
+    await integration.cleanup();
+  });
+
+  const owner = await integration.createWorkspaceMember();
+  const project = await integration.createProject({
+    workspaceId: owner.workspace.id,
+    createdById: owner.user.id,
+  });
+  const navigation = createNavigationHarness();
+
+  const formData = createFormData({
+    tags: "permit, drawings",
+  });
+  formData.set(
+    "file",
+    new File(["drawing"], "permit-set.pdf", {
+      type: "application/pdf",
+    }),
+  );
+
+  const result = await uploadProjectDocumentActionWithDependencies(
+    {
+      db,
+      requireCurrentUser: async () => owner.user,
+      getProjectForUser,
+      saveProjectFile: async () => ({
+        storageKey: `tests/${project.id}/permit-set.pdf`,
+        absolutePath: "/tmp/permit-set.pdf",
+      }),
+      logProjectActivity,
+      revalidatePath: navigation.revalidatePath,
+    },
+    project.id,
+    {},
+    formData,
+  );
+
+  assert.equal(result.success, "Document uploaded.");
+  assert.deepEqual(navigation.revalidatedPaths, [
+    `/projects/${project.id}`,
+    `/projects/${project.id}/documents`,
+  ]);
+
+  const activity = await db.activityLog.findMany({
+    where: {
+      projectId: project.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      eventType: true,
+      summary: true,
+    },
+  });
+
+  assert.equal(activity[0]?.eventType, "document_uploaded");
+  assert.equal(activity[0]?.summary, "Uploaded document permit-set.pdf.");
 });

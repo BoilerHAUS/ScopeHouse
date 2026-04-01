@@ -3,6 +3,7 @@ import test from "node:test";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import { saveScheduleMilestoneActionWithDependencies } from "@/features/schedule/actions/save-schedule-milestone";
 import { getProjectScheduleForUser } from "@/features/schedule/queries/get-project-schedule";
+import { logProjectActivity } from "@/server/activity/log";
 import { db } from "@/server/db/client";
 import { createFormData, createIntegrationContext } from "@/tests/support/db";
 import { createNavigationHarness } from "@/tests/support/navigation";
@@ -120,6 +121,7 @@ test("saveScheduleMilestoneAction appends milestones in order and rejects foreig
       db,
       requireCurrentUser: async () => owner.user,
       getProjectForUser,
+      logProjectActivity,
       revalidatePath: () => {},
     },
     project.id,
@@ -139,6 +141,7 @@ test("saveScheduleMilestoneAction appends milestones in order and rejects foreig
       db,
       requireCurrentUser: async () => owner.user,
       getProjectForUser,
+      logProjectActivity,
       revalidatePath: navigation.revalidatePath,
     },
     project.id,
@@ -181,4 +184,20 @@ test("saveScheduleMilestoneAction appends milestones in order and rejects foreig
       itemOrder: 1,
     },
   ]);
+
+  const activity = await db.activityLog.findMany({
+    where: {
+      projectId: project.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      eventType: true,
+      summary: true,
+    },
+  });
+
+  assert.equal(activity[0]?.eventType, "schedule_milestone_saved");
+  assert.equal(activity[0]?.summary, "Added milestone Cabinets delivered.");
 });

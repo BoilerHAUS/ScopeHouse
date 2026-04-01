@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 
 export async function deleteScheduleMilestoneAction(
@@ -25,6 +26,7 @@ export async function deleteScheduleMilestoneAction(
     select: {
       id: true,
       phaseId: true,
+      label: true,
       itemOrder: true,
     },
   });
@@ -54,6 +56,18 @@ export async function deleteScheduleMilestoneAction(
       },
     }),
   ]);
+
+  await logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "schedule_milestone_deleted",
+    summary: `Removed milestone ${milestone.label}.`,
+    metadata: {
+      milestoneId: milestone.id,
+      phaseId: milestone.phaseId,
+    },
+  });
 
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/schedule`);

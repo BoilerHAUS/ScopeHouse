@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import {
   scheduleMilestoneFormSchema,
@@ -13,6 +14,7 @@ type SaveScheduleMilestoneActionDependencies = {
   db: typeof db;
   requireCurrentUser: typeof requireCurrentUser;
   getProjectForUser: typeof getProjectForUser;
+  logProjectActivity: typeof logProjectActivity;
   revalidatePath: typeof revalidatePath;
 };
 
@@ -20,6 +22,7 @@ const saveScheduleMilestoneActionDependencies: SaveScheduleMilestoneActionDepend
   db,
   requireCurrentUser,
   getProjectForUser,
+  logProjectActivity,
   revalidatePath,
 };
 
@@ -89,6 +92,7 @@ export async function saveScheduleMilestoneActionWithDependencies(
   }
 
   const milestoneId = result.data.milestoneId?.trim();
+  let savedMilestoneId = milestoneId ?? "";
 
   if (milestoneId) {
     const existingMilestone = await dependencies.db.scheduleMilestone.findFirst({
@@ -107,7 +111,7 @@ export async function saveScheduleMilestoneActionWithDependencies(
       };
     }
 
-    await dependencies.db.scheduleMilestone.update({
+    const updatedMilestone = await dependencies.db.scheduleMilestone.update({
       where: {
         id: milestoneId,
       },
@@ -117,7 +121,12 @@ export async function saveScheduleMilestoneActionWithDependencies(
         targetDate: result.data.targetDate,
         notes: result.data.notes,
       },
+      select: {
+        id: true,
+      },
     });
+
+    savedMilestoneId = updatedMilestone.id;
   } else {
     const lastMilestone = await dependencies.db.scheduleMilestone.findFirst({
       where: {
@@ -132,7 +141,7 @@ export async function saveScheduleMilestoneActionWithDependencies(
       },
     });
 
-    await dependencies.db.scheduleMilestone.create({
+    const createdMilestone = await dependencies.db.scheduleMilestone.create({
       data: {
         projectId,
         phaseId: result.data.phaseId,
@@ -141,8 +150,27 @@ export async function saveScheduleMilestoneActionWithDependencies(
         notes: result.data.notes,
         itemOrder: (lastMilestone?.itemOrder ?? -1) + 1,
       },
+      select: {
+        id: true,
+      },
     });
+
+    savedMilestoneId = createdMilestone.id;
   }
+
+  await dependencies.logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "schedule_milestone_saved",
+    summary: `${milestoneId ? "Updated" : "Added"} milestone ${result.data.label}.`,
+    metadata: {
+      milestoneId: savedMilestoneId,
+      phaseId: result.data.phaseId,
+      isUpdate: Boolean(milestoneId),
+      targetDate: result.data.targetDate,
+    },
+  });
 
   dependencies.revalidatePath(`/projects/${projectId}`);
   dependencies.revalidatePath(`/projects/${projectId}/schedule`);

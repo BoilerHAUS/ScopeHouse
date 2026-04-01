@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireCurrentUser } from "@/server/auth/session";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import { db } from "@/server/db/client";
+import { logProjectActivity } from "@/server/activity/log";
 import {
   getDocumentContentType,
   MAX_DOCUMENT_SIZE_BYTES,
@@ -14,13 +15,45 @@ import {
   type DocumentUploadActionState,
 } from "@/features/documents/schemas/document-upload-form";
 
+type UploadProjectDocumentActionDependencies = {
+  db: typeof db;
+  requireCurrentUser: typeof requireCurrentUser;
+  getProjectForUser: typeof getProjectForUser;
+  saveProjectFile: typeof saveProjectFile;
+  logProjectActivity: typeof logProjectActivity;
+  revalidatePath: typeof revalidatePath;
+};
+
+const uploadProjectDocumentActionDependencies: UploadProjectDocumentActionDependencies = {
+  db,
+  requireCurrentUser,
+  getProjectForUser,
+  saveProjectFile,
+  logProjectActivity,
+  revalidatePath,
+};
+
 export async function uploadProjectDocumentAction(
+  projectId: string,
+  previousState: DocumentUploadActionState,
+  formData: FormData,
+): Promise<DocumentUploadActionState> {
+  return uploadProjectDocumentActionWithDependencies(
+    uploadProjectDocumentActionDependencies,
+    projectId,
+    previousState,
+    formData,
+  );
+}
+
+export async function uploadProjectDocumentActionWithDependencies(
+  dependencies: UploadProjectDocumentActionDependencies,
   projectId: string,
   _previousState: DocumentUploadActionState,
   formData: FormData,
 ): Promise<DocumentUploadActionState> {
-  const user = await requireCurrentUser();
-  const project = await getProjectForUser(projectId, user.id);
+  const user = await dependencies.requireCurrentUser();
+  const project = await dependencies.getProjectForUser(projectId, user.id);
 
   if (!project) {
     return {
@@ -73,14 +106,14 @@ export async function uploadProjectDocumentAction(
   }
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const storedFile = await saveProjectFile({
+  const storedFile = await dependencies.saveProjectFile({
     kind: "documents",
     projectId,
     originalName: file.name,
     bytes,
   });
 
-  await db.projectDocument.create({
+  const document = await dependencies.db.projectDocument.create({
     data: {
       projectId,
       createdById: user.id,
@@ -90,10 +123,27 @@ export async function uploadProjectDocumentAction(
       sizeBytes: file.size,
       tags: metadataResult.data.tags,
     },
+    select: {
+      id: true,
+    },
   });
 
-  revalidatePath(`/projects/${projectId}`);
-  revalidatePath(`/projects/${projectId}/documents`);
+  await dependencies.logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "document_uploaded",
+    summary: `Uploaded document ${file.name}.`,
+    metadata: {
+      documentId: document.id,
+      contentType,
+      sizeBytes: file.size,
+      tagCount: metadataResult.data.tags.length,
+    },
+  });
+
+  dependencies.revalidatePath(`/projects/${projectId}`);
+  dependencies.revalidatePath(`/projects/${projectId}/documents`);
 
   return {
     success: "Document uploaded.",

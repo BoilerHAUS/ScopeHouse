@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 
 export async function deleteSchedulePhaseAction(projectId: string, formData: FormData) {
@@ -21,6 +22,7 @@ export async function deleteSchedulePhaseAction(projectId: string, formData: For
     },
     select: {
       id: true,
+      name: true,
       itemOrder: true,
     },
   });
@@ -49,6 +51,17 @@ export async function deleteSchedulePhaseAction(projectId: string, formData: For
       },
     }),
   ]);
+
+  await logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "schedule_phase_deleted",
+    summary: `Removed schedule phase ${phase.name}.`,
+    metadata: {
+      phaseId: phase.id,
+    },
+  });
 
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/schedule`);

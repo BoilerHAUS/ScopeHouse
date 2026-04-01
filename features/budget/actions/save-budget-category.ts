@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import {
   budgetCategoryFormSchema,
@@ -42,6 +43,7 @@ export async function saveBudgetCategoryAction(
   }
 
   const categoryId = result.data.categoryId?.trim();
+  let savedCategoryId = categoryId ?? "";
 
   if (categoryId) {
     const existingCategory = await db.budgetCategory.findFirst({
@@ -58,7 +60,7 @@ export async function saveBudgetCategoryAction(
       return { error: "Budget category not found." };
     }
 
-    await db.budgetCategory.update({
+    const updatedCategory = await db.budgetCategory.update({
       where: {
         id: categoryId,
       },
@@ -67,7 +69,12 @@ export async function saveBudgetCategoryAction(
         notes: result.data.notes,
         status: result.data.status,
       },
+      select: {
+        id: true,
+      },
     });
+
+    savedCategoryId = updatedCategory.id;
   } else {
     const lastCategory = await db.budgetCategory.findFirst({
       where: {
@@ -81,7 +88,7 @@ export async function saveBudgetCategoryAction(
       },
     });
 
-    await db.budgetCategory.create({
+    const createdCategory = await db.budgetCategory.create({
       data: {
         projectId,
         label: result.data.label,
@@ -89,8 +96,26 @@ export async function saveBudgetCategoryAction(
         status: result.data.status,
         itemOrder: (lastCategory?.itemOrder ?? -1) + 1,
       },
+      select: {
+        id: true,
+      },
     });
+
+    savedCategoryId = createdCategory.id;
   }
+
+  await logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "budget_category_saved",
+    summary: `${categoryId ? "Updated" : "Added"} budget category ${result.data.label}.`,
+    metadata: {
+      categoryId: savedCategoryId,
+      isUpdate: Boolean(categoryId),
+      status: result.data.status,
+    },
+  });
 
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/budget`);

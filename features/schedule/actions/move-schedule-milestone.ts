@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 
 export async function moveScheduleMilestoneAction(
@@ -25,6 +26,7 @@ export async function moveScheduleMilestoneAction(
     select: {
       id: true,
       phaseId: true,
+      label: true,
       itemOrder: true,
     },
   });
@@ -77,6 +79,20 @@ export async function moveScheduleMilestoneAction(
       },
     }),
   ]);
+
+  await logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "schedule_milestone_reordered",
+    summary: `Moved milestone ${currentMilestone.label} ${direction}.`,
+    metadata: {
+      milestoneId: currentMilestone.id,
+      phaseId: currentMilestone.phaseId,
+      direction,
+      adjacentMilestoneId: adjacentMilestone.id,
+    },
+  });
 
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/schedule`);

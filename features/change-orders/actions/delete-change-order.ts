@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireCurrentUser } from "@/server/auth/session";
 import { db } from "@/server/db/client";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 
 export async function deleteChangeOrderAction(projectId: string, formData: FormData) {
@@ -19,7 +20,7 @@ export async function deleteChangeOrderAction(projectId: string, formData: FormD
       id: changeOrderId,
       projectId,
     },
-    select: { id: true },
+    select: { id: true, title: true, status: true },
   });
 
   if (!existing) {
@@ -28,6 +29,18 @@ export async function deleteChangeOrderAction(projectId: string, formData: FormD
 
   await db.changeOrder.delete({
     where: { id: changeOrderId },
+  });
+
+  await logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "change_order_deleted",
+    summary: `Removed change order ${existing.title}.`,
+    metadata: {
+      changeOrderId: existing.id,
+      status: existing.status,
+    },
   });
 
   revalidatePath(`/projects/${projectId}`);

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 
 export async function deleteDecisionAction(projectId: string, formData: FormData) {
@@ -14,10 +15,37 @@ export async function deleteDecisionAction(projectId: string, formData: FormData
     return;
   }
 
-  await db.decision.deleteMany({
+  const decision = await db.decision.findFirst({
     where: {
       id: decisionId,
       projectId,
+    },
+    select: {
+      id: true,
+      summary: true,
+      status: true,
+    },
+  });
+
+  if (!decision) {
+    return;
+  }
+
+  await db.decision.delete({
+    where: {
+      id: decision.id,
+    },
+  });
+
+  await logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "decision_deleted",
+    summary: `Removed decision ${decision.summary}.`,
+    metadata: {
+      decisionId: decision.id,
+      status: decision.status,
     },
   });
 

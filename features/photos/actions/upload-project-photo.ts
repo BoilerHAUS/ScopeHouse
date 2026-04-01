@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireCurrentUser } from "@/server/auth/session";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import { db } from "@/server/db/client";
+import { logProjectActivity } from "@/server/activity/log";
 import { getPhotoContentType, MAX_PHOTO_SIZE_BYTES } from "@/server/storage/file-rules";
 import { saveProjectFile } from "@/server/storage/project-files";
 import {
@@ -11,13 +12,45 @@ import {
   type PhotoUploadActionState,
 } from "@/features/photos/schemas/photo-upload-form";
 
+type UploadProjectPhotoActionDependencies = {
+  db: typeof db;
+  requireCurrentUser: typeof requireCurrentUser;
+  getProjectForUser: typeof getProjectForUser;
+  saveProjectFile: typeof saveProjectFile;
+  logProjectActivity: typeof logProjectActivity;
+  revalidatePath: typeof revalidatePath;
+};
+
+const uploadProjectPhotoActionDependencies: UploadProjectPhotoActionDependencies = {
+  db,
+  requireCurrentUser,
+  getProjectForUser,
+  saveProjectFile,
+  logProjectActivity,
+  revalidatePath,
+};
+
 export async function uploadProjectPhotoAction(
+  projectId: string,
+  previousState: PhotoUploadActionState,
+  formData: FormData,
+): Promise<PhotoUploadActionState> {
+  return uploadProjectPhotoActionWithDependencies(
+    uploadProjectPhotoActionDependencies,
+    projectId,
+    previousState,
+    formData,
+  );
+}
+
+export async function uploadProjectPhotoActionWithDependencies(
+  dependencies: UploadProjectPhotoActionDependencies,
   projectId: string,
   _previousState: PhotoUploadActionState,
   formData: FormData,
 ): Promise<PhotoUploadActionState> {
-  const user = await requireCurrentUser();
-  const project = await getProjectForUser(projectId, user.id);
+  const user = await dependencies.requireCurrentUser();
+  const project = await dependencies.getProjectForUser(projectId, user.id);
 
   if (!project) {
     return {
@@ -78,14 +111,14 @@ export async function uploadProjectPhotoAction(
   }
 
   const bytes = new Uint8Array(await file.arrayBuffer());
-  const storedFile = await saveProjectFile({
+  const storedFile = await dependencies.saveProjectFile({
     kind: "photos",
     projectId,
     originalName: file.name,
     bytes,
   });
 
-  await db.projectPhoto.create({
+  const photo = await dependencies.db.projectPhoto.create({
     data: {
       projectId,
       createdById: user.id,
@@ -98,10 +131,29 @@ export async function uploadProjectPhotoAction(
       phaseTag: metadataResult.data.phaseTag,
       takenOn: metadataResult.data.takenOn,
     },
+    select: {
+      id: true,
+    },
   });
 
-  revalidatePath(`/projects/${projectId}`);
-  revalidatePath(`/projects/${projectId}/photos`);
+  await dependencies.logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "photo_uploaded",
+    summary: `Uploaded photo ${metadataResult.data.caption ?? file.name}.`,
+    metadata: {
+      photoId: photo.id,
+      contentType,
+      sizeBytes: file.size,
+      roomTag: metadataResult.data.roomTag,
+      phaseTag: metadataResult.data.phaseTag,
+      takenOn: metadataResult.data.takenOn,
+    },
+  });
+
+  dependencies.revalidatePath(`/projects/${projectId}`);
+  dependencies.revalidatePath(`/projects/${projectId}/photos`);
 
   return {
     success: "Photo uploaded.",

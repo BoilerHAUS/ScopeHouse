@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import {
   schedulePhaseFormSchema,
@@ -46,6 +47,7 @@ export async function saveSchedulePhaseAction(
   }
 
   const phaseId = result.data.phaseId?.trim();
+  let savedPhaseId = phaseId ?? "";
 
   if (phaseId) {
     const existingPhase = await db.schedulePhase.findFirst({
@@ -64,7 +66,7 @@ export async function saveSchedulePhaseAction(
       };
     }
 
-    await db.schedulePhase.update({
+    const updatedPhase = await db.schedulePhase.update({
       where: {
         id: phaseId,
       },
@@ -74,7 +76,12 @@ export async function saveSchedulePhaseAction(
         targetStartDate: result.data.targetStartDate,
         targetEndDate: result.data.targetEndDate,
       },
+      select: {
+        id: true,
+      },
     });
+
+    savedPhaseId = updatedPhase.id;
   } else {
     const lastPhase = await db.schedulePhase.findFirst({
       where: {
@@ -88,7 +95,7 @@ export async function saveSchedulePhaseAction(
       },
     });
 
-    await db.schedulePhase.create({
+    const createdPhase = await db.schedulePhase.create({
       data: {
         projectId,
         name: result.data.name,
@@ -97,8 +104,27 @@ export async function saveSchedulePhaseAction(
         targetEndDate: result.data.targetEndDate,
         itemOrder: (lastPhase?.itemOrder ?? -1) + 1,
       },
+      select: {
+        id: true,
+      },
     });
+
+    savedPhaseId = createdPhase.id;
   }
+
+  await logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "schedule_phase_saved",
+    summary: `${phaseId ? "Updated" : "Added"} schedule phase ${result.data.name}.`,
+    metadata: {
+      phaseId: savedPhaseId,
+      isUpdate: Boolean(phaseId),
+      targetStartDate: result.data.targetStartDate,
+      targetEndDate: result.data.targetEndDate,
+    },
+  });
 
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/schedule`);

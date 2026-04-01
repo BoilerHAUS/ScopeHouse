@@ -3,6 +3,7 @@ import test from "node:test";
 import { saveBudgetLineActionWithDependencies } from "@/features/budget/actions/save-budget-line";
 import { getProjectBudgetForUser } from "@/features/budget/queries/get-project-budget";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
+import { logProjectActivity } from "@/server/activity/log";
 import { db } from "@/server/db/client";
 import { createFormData, createIntegrationContext } from "@/tests/support/db";
 import { createNavigationHarness } from "@/tests/support/navigation";
@@ -52,6 +53,7 @@ test("saveBudgetLineAction persists ordered amounts and budget query rolls up to
       db,
       requireCurrentUser: async () => owner.user,
       getProjectForUser,
+      logProjectActivity,
       revalidatePath: navigation.revalidatePath,
     },
     project.id,
@@ -100,6 +102,22 @@ test("saveBudgetLineAction persists ordered amounts and budget query rolls up to
     actualCents: 145000,
     itemOrder: 1,
   });
+
+  const activity = await db.activityLog.findMany({
+    where: {
+      projectId: project.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      eventType: true,
+      summary: true,
+    },
+  });
+
+  assert.equal(activity[0]?.eventType, "budget_line_saved");
+  assert.equal(activity[0]?.summary, "Added budget line Custom cabinets.");
 
   const budget = await getProjectBudgetForUser(project.id, owner.user.id);
   assert.ok(budget);
@@ -153,6 +171,7 @@ test("saveBudgetLineAction rejects categories outside the current project", asyn
       db,
       requireCurrentUser: async () => owner.user,
       getProjectForUser,
+      logProjectActivity,
       revalidatePath: () => {},
     },
     project.id,

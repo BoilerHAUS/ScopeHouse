@@ -3,6 +3,7 @@ import test from "node:test";
 import { saveChangeOrderActionWithDependencies } from "@/features/change-orders/actions/save-change-order";
 import { listProjectChangeOrdersForUser } from "@/features/change-orders/queries/list-project-change-orders";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
+import { logProjectActivity } from "@/server/activity/log";
 import { db } from "@/server/db/client";
 import { createFormData, createIntegrationContext } from "@/tests/support/db";
 import { createNavigationHarness } from "@/tests/support/navigation";
@@ -73,6 +74,7 @@ test("saveChangeOrderAction persists the normalized request date and revalidates
       db,
       requireCurrentUser: async () => owner.user,
       getProjectForUser,
+      logProjectActivity,
       revalidatePath: navigation.revalidatePath,
     },
     project.id,
@@ -111,4 +113,23 @@ test("saveChangeOrderAction persists the normalized request date and revalidates
   assert.equal(changeOrder?.requestedAt.toISOString(), "2026-07-02T12:00:00.000Z");
   assert.equal(changeOrder?.budgetReference, "Budget line 12");
   assert.equal(changeOrder?.scheduleReference, "Electrical rough-in");
+
+  const activity = await db.activityLog.findMany({
+    where: {
+      projectId: project.id,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      eventType: true,
+      summary: true,
+    },
+  });
+
+  assert.equal(activity[0]?.eventType, "change_order_saved");
+  assert.equal(
+    activity[0]?.summary,
+    "Recorded change order Add under-cabinet lighting.",
+  );
 });

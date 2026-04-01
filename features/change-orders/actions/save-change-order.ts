@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireCurrentUser } from "@/server/auth/session";
 import { db } from "@/server/db/client";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import {
   changeOrderFormSchema,
@@ -13,6 +14,7 @@ type SaveChangeOrderActionDependencies = {
   db: typeof db;
   requireCurrentUser: typeof requireCurrentUser;
   getProjectForUser: typeof getProjectForUser;
+  logProjectActivity: typeof logProjectActivity;
   revalidatePath: typeof revalidatePath;
 };
 
@@ -20,6 +22,7 @@ const saveChangeOrderActionDependencies: SaveChangeOrderActionDependencies = {
   db,
   requireCurrentUser,
   getProjectForUser,
+  logProjectActivity,
   revalidatePath,
 };
 
@@ -80,6 +83,7 @@ export async function saveChangeOrderActionWithDependencies(
   }
 
   const changeOrderId = result.data.changeOrderId?.trim();
+  let savedChangeOrderId = changeOrderId ?? "";
 
   if (changeOrderId) {
     const existing = await dependencies.db.changeOrder.findFirst({
@@ -94,7 +98,7 @@ export async function saveChangeOrderActionWithDependencies(
       return { error: "Change order not found." };
     }
 
-    await dependencies.db.changeOrder.update({
+    const updatedChangeOrder = await dependencies.db.changeOrder.update({
       where: { id: changeOrderId },
       data: {
         title: result.data.title,
@@ -106,9 +110,14 @@ export async function saveChangeOrderActionWithDependencies(
         scheduleReference: result.data.scheduleReference,
         notes: result.data.notes,
       },
+      select: {
+        id: true,
+      },
     });
+
+    savedChangeOrderId = updatedChangeOrder.id;
   } else {
-    await dependencies.db.changeOrder.create({
+    const createdChangeOrder = await dependencies.db.changeOrder.create({
       data: {
         projectId,
         title: result.data.title,
@@ -120,8 +129,26 @@ export async function saveChangeOrderActionWithDependencies(
         scheduleReference: result.data.scheduleReference,
         notes: result.data.notes,
       },
+      select: {
+        id: true,
+      },
     });
+
+    savedChangeOrderId = createdChangeOrder.id;
   }
+
+  await dependencies.logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "change_order_saved",
+    summary: `${changeOrderId ? "Updated" : "Recorded"} change order ${result.data.title}.`,
+    metadata: {
+      changeOrderId: savedChangeOrderId,
+      isUpdate: Boolean(changeOrderId),
+      status: result.data.status,
+    },
+  });
 
   dependencies.revalidatePath(`/projects/${projectId}`);
   dependencies.revalidatePath(`/projects/${projectId}/change-orders`);

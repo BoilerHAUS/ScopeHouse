@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireCurrentUser } from "@/server/auth/session";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import { db } from "@/server/db/client";
+import { logProjectActivity } from "@/server/activity/log";
 import { deleteProjectFile } from "@/server/storage/project-files";
 
 type DeleteProjectDocumentActionDependencies = {
@@ -11,6 +12,7 @@ type DeleteProjectDocumentActionDependencies = {
   requireCurrentUser: typeof requireCurrentUser;
   getProjectForUser: typeof getProjectForUser;
   deleteProjectFile: typeof deleteProjectFile;
+  logProjectActivity: typeof logProjectActivity;
   revalidatePath: typeof revalidatePath;
 };
 
@@ -19,6 +21,7 @@ const deleteProjectDocumentActionDependencies: DeleteProjectDocumentActionDepend
   requireCurrentUser,
   getProjectForUser,
   deleteProjectFile,
+  logProjectActivity,
   revalidatePath,
 };
 
@@ -53,6 +56,7 @@ export async function deleteProjectDocumentActionWithDependencies(
     },
     select: {
       id: true,
+      originalName: true,
       storageKey: true,
     },
   });
@@ -66,6 +70,18 @@ export async function deleteProjectDocumentActionWithDependencies(
   await dependencies.db.projectDocument.delete({
     where: {
       id: document.id,
+    },
+  });
+
+  await dependencies.logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "document_deleted",
+    summary: `Removed document ${document.originalName}.`,
+    metadata: {
+      documentId: document.id,
+      storageKey: document.storageKey,
     },
   });
 

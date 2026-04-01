@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/server/db/client";
 import { requireCurrentUser } from "@/server/auth/session";
+import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 
 export async function moveSchedulePhaseAction(
@@ -24,6 +25,7 @@ export async function moveSchedulePhaseAction(
     },
     select: {
       id: true,
+      name: true,
       itemOrder: true,
     },
   });
@@ -75,6 +77,19 @@ export async function moveSchedulePhaseAction(
       },
     }),
   ]);
+
+  await logProjectActivity({
+    projectId,
+    workspaceId: project.workspaceId,
+    actorId: user.id,
+    eventType: "schedule_phase_reordered",
+    summary: `Moved schedule phase ${currentPhase.name} ${direction}.`,
+    metadata: {
+      phaseId: currentPhase.id,
+      direction,
+      adjacentPhaseId: adjacentPhase.id,
+    },
+  });
 
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/schedule`);
