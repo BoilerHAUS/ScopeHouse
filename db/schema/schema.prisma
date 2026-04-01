@@ -40,6 +40,8 @@ enum ContractorInvolvement {
 
 enum ActivityEventType {
   project_created
+  project_archived
+  project_restored
   project_updated
   intake_started
   intake_saved

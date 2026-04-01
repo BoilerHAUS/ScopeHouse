@@ -2,12 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Route } from "next";
 import { PageContainer } from "@/components/layout/page-container";
+import { Button } from "@/components/ui/button";
 import { requireCurrentUser } from "@/server/auth/session";
 import { listProjectChangeOrdersForUser } from "@/features/change-orders/queries/list-project-change-orders";
 import { listProjectDecisionsForUser } from "@/features/decisions/queries/list-project-decisions";
+import { archiveProjectAction } from "@/features/projects/actions/archive-project";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import { getProjectIntakeForUser } from "@/features/intake/queries/get-project-intake";
 import { listProjectActivityForUser } from "@/features/projects/queries/list-project-activity";
+import { restoreProjectAction } from "@/features/projects/actions/restore-project";
 
 function formatLabel(value: string) {
   return value.replaceAll("_", " ");
@@ -57,6 +60,10 @@ export default async function ProjectWorkspacePage({
   if (!project || !changeOrders) {
     notFound();
   }
+
+  const lifecycleAction = project.archivedAt
+    ? restoreProjectAction.bind(null, project.id)
+    : archiveProjectAction.bind(null, project.id);
 
   const intakeCompleted = Boolean(intakeRecord?.intake?.completedAt);
   const intakeStarted = Boolean(intakeRecord?.intake);
@@ -130,30 +137,53 @@ export default async function ProjectWorkspacePage({
               {project.title}
             </h2>
             <p className="text-muted mt-3 max-w-2xl text-sm leading-7">
-              The project shell is active. Continue with intake to capture the
-              room list, goals, budget range, timing, and constraints that will
-              drive the first scope draft.
+              {project.archivedAt
+                ? "This project is archived. It stays intact, but it is hidden from the active project list until restored."
+                : "The project shell is active. Continue with intake to capture the room list, goals, budget range, timing, and constraints that will drive the first scope draft."}
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:w-[360px]">
-            <div className="bg-surface-strong/55 rounded-[1.5rem] px-4 py-4">
-              <p className="text-muted text-xs uppercase tracking-[0.2em]">
-                Status
-              </p>
-              <p className="mt-2 text-base font-semibold capitalize">
-                {formatLabel(project.status)}
-              </p>
-            </div>
-            <div className="bg-surface-strong/55 rounded-[1.5rem] px-4 py-4">
-              <p className="text-muted text-xs uppercase tracking-[0.2em]">
-                Type
-              </p>
-              <p className="mt-2 text-base font-semibold capitalize">
-                {formatLabel(project.projectType)}
-              </p>
+          <div className="flex flex-col gap-3 lg:items-end">
+            <form action={lifecycleAction}>
+              <Button
+                type="submit"
+                variant={project.archivedAt ? "default" : "outline"}
+                className="rounded-full px-5"
+              >
+                {project.archivedAt ? "Restore project" : "Archive project"}
+              </Button>
+            </form>
+            <div className="grid gap-3 sm:grid-cols-2 lg:w-[360px]">
+              <div className="bg-surface-strong/55 rounded-[1.5rem] px-4 py-4">
+                <p className="text-muted text-xs uppercase tracking-[0.2em]">
+                  Status
+                </p>
+                <p className="mt-2 text-base font-semibold capitalize">
+                  {formatLabel(project.status)}
+                </p>
+              </div>
+              <div className="bg-surface-strong/55 rounded-[1.5rem] px-4 py-4">
+                <p className="text-muted text-xs uppercase tracking-[0.2em]">
+                  Type
+                </p>
+                <p className="mt-2 text-base font-semibold capitalize">
+                  {formatLabel(project.projectType)}
+                </p>
+              </div>
             </div>
           </div>
         </div>
+
+        {project.archivedAt ? (
+          <div className="mt-6 rounded-[1.5rem] border border-stone-300 bg-stone-50 px-5 py-4">
+            <p className="text-muted text-xs uppercase tracking-[0.2em]">
+              Archived
+            </p>
+            <p className="mt-2 text-sm leading-7">
+              Archived on {project.archivedAt.toLocaleDateString()}. Restore the
+              project when it needs to return to the active workspace list.
+            </p>
+          </div>
+        ) : null}
 
         <div className="mt-8 grid gap-4 lg:grid-cols-2">
           <div className="border-border rounded-[1.5rem] border px-5 py-5">
