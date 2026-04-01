@@ -35,6 +35,8 @@ The initial schema is intentionally narrow:
 - `ScopeItem`
 - `AiGeneration`
 - `Decision`
+- `BudgetCategory`
+- `BudgetLine`
 
 The project model now includes:
 
@@ -61,3 +63,9 @@ The decision foundation now adds:
 - project-linked decision records
 - explicit decision status values
 - owner, date, and notes fields for reviewable project context
+
+The budget foundation now adds:
+
+- budget categories with explicit ordering
+- planning line items with estimate, allowance, quote, and actual amounts
+- cent-based currency storage for deterministic calculations

@@ -276,3 +276,46 @@ Key fields:
 - `notes`
 - `createdAt`
 - `updatedAt`
+
+### BudgetCategory
+
+Purpose:
+
+- groups budget lines into planning-friendly buckets for project review
+
+Key fields:
+
+- `projectId`
+- `label`
+- `notes`
+- `status`
+- `itemOrder`
+- `createdAt`
+- `updatedAt`
+
+### BudgetLine
+
+Purpose:
+
+- stores planning and pricing amounts for a single budget item
+
+Key fields:
+
+- `projectId`
+- `categoryId`
+- `scopeItemId`
+- `label`
+- `estimateCents`
+- `allowanceCents`
+- `quotedCents`
+- `actualCents`
+- `sourceReference`
+- `notes`
+- `itemOrder`
+- `createdAt`
+- `updatedAt`
+
+Notes:
+
+- currency is stored in integer cents to avoid rounding drift
+- project planning totals prefer `actual` then `quoted` then `allowance` then `estimate`

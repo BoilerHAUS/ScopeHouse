@@ -191,6 +191,58 @@ async function main() {
       notes: "Affects cabinet layout, appliance allowances, and lead-time risk.",
     },
   });
+
+  const cabinetryCategory = await prisma.budgetCategory.upsert({
+    where: {
+      id: "scopehouse-demo-budget-category-cabinetry",
+    },
+    update: {
+      projectId: project.id,
+      label: "Cabinetry and millwork",
+      notes: "Core kitchen storage and trim package.",
+      status: "active",
+      itemOrder: 0,
+    },
+    create: {
+      id: "scopehouse-demo-budget-category-cabinetry",
+      projectId: project.id,
+      label: "Cabinetry and millwork",
+      notes: "Core kitchen storage and trim package.",
+      status: "active",
+      itemOrder: 0,
+    },
+  });
+
+  await prisma.budgetLine.upsert({
+    where: {
+      id: "scopehouse-demo-budget-line-cabinets",
+    },
+    update: {
+      projectId: project.id,
+      categoryId: cabinetryCategory.id,
+      label: "Base and wall cabinets",
+      estimateCents: 1800000,
+      allowanceCents: 2000000,
+      quotedCents: 2150000,
+      actualCents: null,
+      sourceReference: "Cabinet package rev A",
+      notes: "Appliance panels still excluded.",
+      itemOrder: 0,
+    },
+    create: {
+      id: "scopehouse-demo-budget-line-cabinets",
+      projectId: project.id,
+      categoryId: cabinetryCategory.id,
+      label: "Base and wall cabinets",
+      estimateCents: 1800000,
+      allowanceCents: 2000000,
+      quotedCents: 2150000,
+      actualCents: null,
+      sourceReference: "Cabinet package rev A",
+      notes: "Appliance panels still excluded.",
+      itemOrder: 0,
+    },
+  });
 }
 
 main()

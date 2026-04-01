@@ -84,6 +84,11 @@ enum DecisionStatus {
   deferred
 }
 
+enum BudgetCategoryStatus {
+  draft
+  active
+}
+
 model User {
   id              String            @id @default(cuid())
   email           String            @unique
@@ -137,6 +142,8 @@ model Project {
   updatedAt     DateTime       @updatedAt
   activityLogs  ActivityLog[]
   aiGenerations AiGeneration[]
+  budgetCategories BudgetCategory[]
+  budgetLines   BudgetLine[]
   decisions     Decision[]
   intake        ProjectIntake?
   scopeDrafts   ScopeDraft[]
@@ -225,6 +232,7 @@ model ScopeItem {
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   appliedFromDraft  ScopeDraft?     @relation(fields: [appliedFromDraftId], references: [id], onDelete: SetNull)
+  budgetLines       BudgetLine[]
   project           Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId, phaseOrder, areaOrder, itemOrder])
@@ -268,6 +276,45 @@ model Decision {
 
   @@index([projectId, recordedAt])
   @@index([status])
+}
+
+model BudgetCategory {
+  id         String               @id @default(cuid())
+  projectId  String
+  label      String
+  notes      String?
+  status     BudgetCategoryStatus @default(active)
+  itemOrder  Int
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  lines      BudgetLine[]
+  project    Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, itemOrder])
+  @@index([status])
+}
+
+model BudgetLine {
+  id              String         @id @default(cuid())
+  projectId       String
+  categoryId      String
+  scopeItemId     String?
+  label           String
+  estimateCents   Int?
+  allowanceCents  Int?
+  quotedCents     Int?
+  actualCents     Int?
+  sourceReference String?
+  notes           String?
+  itemOrder       Int
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  category        BudgetCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  project         Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scopeItem       ScopeItem?     @relation(fields: [scopeItemId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, categoryId, itemOrder])
+  @@index([scopeItemId])
 }
 
 model Session {

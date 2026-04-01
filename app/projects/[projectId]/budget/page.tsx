@@ -1,19 +1,29 @@
-import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
+import { BudgetPlanner } from "@/features/budget/components/budget-planner";
+import { getProjectBudgetForUser } from "@/features/budget/queries/get-project-budget";
+import { requireCurrentUser } from "@/server/auth/session";
 
-export default function ProjectBudgetPage() {
+type ProjectBudgetPageProps = {
+  params: Promise<{
+    projectId: string;
+  }>;
+};
+
+export default async function ProjectBudgetPage({
+  params,
+}: ProjectBudgetPageProps) {
+  const user = await requireCurrentUser();
+  const { projectId } = await params;
+  const budget = await getProjectBudgetForUser(projectId, user.id);
+
+  if (!budget) {
+    notFound();
+  }
+
   return (
     <PageContainer>
-      <FeaturePlaceholder
-        eyebrow="Budget"
-        title="Budget planner"
-        description="Budgeting belongs here once the project has a usable scope baseline and category structure."
-        points={[
-          "Keep rollups and calculations in testable domain logic.",
-          "Track estimate, allowance, quote, and actual states explicitly.",
-          "Avoid spreadsheet-style sprawl in page files.",
-        ]}
-      />
+      <BudgetPlanner projectId={projectId} budget={budget} />
     </PageContainer>
   );
 }
