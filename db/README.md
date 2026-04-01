@@ -34,6 +34,7 @@ The initial schema is intentionally narrow:
 - `ScopeDraft`
 - `ScopeItem`
 - `AiGeneration`
+- `Decision`
 
 The project model now includes:
 
@@ -54,3 +55,9 @@ The scope and AI foundation now add:
 - grouped scope items with explicit ordering
 - reviewable AI scope drafts before writeback
 - AI generation logs with prompt version and model metadata
+
+The decision foundation now adds:
+
+- project-linked decision records
+- explicit decision status values
+- owner, date, and notes fields for reviewable project context

@@ -259,3 +259,20 @@ Key fields:
 - `completedAt`
 - `createdAt`
 - `updatedAt`
+
+### Decision
+
+Purpose:
+
+- records project approvals, open questions, and deferrals in one durable log
+
+Key fields:
+
+- `projectId`
+- `summary`
+- `owner`
+- `status`
+- `recordedAt`
+- `notes`
+- `createdAt`
+- `updatedAt`

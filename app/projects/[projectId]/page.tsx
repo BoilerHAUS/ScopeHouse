@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Route } from "next";
 import { PageContainer } from "@/components/layout/page-container";
 import { requireCurrentUser } from "@/server/auth/session";
+import { listProjectDecisionsForUser } from "@/features/decisions/queries/list-project-decisions";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import { getProjectIntakeForUser } from "@/features/intake/queries/get-project-intake";
 import { listProjectActivityForUser } from "@/features/projects/queries/list-project-activity";
@@ -44,10 +45,11 @@ export default async function ProjectWorkspacePage({
 }: ProjectWorkspacePageProps) {
   const user = await requireCurrentUser();
   const { projectId } = await params;
-  const [project, intakeRecord, activity] = await Promise.all([
+  const [project, intakeRecord, activity, decisions] = await Promise.all([
     getProjectForUser(projectId, user.id),
     getProjectIntakeForUser(projectId, user.id),
     listProjectActivityForUser(projectId, user.id),
+    listProjectDecisionsForUser(projectId, user.id),
   ]);
 
   if (!project) {
@@ -57,7 +59,7 @@ export default async function ProjectWorkspacePage({
   const intakeCompleted = Boolean(intakeRecord?.intake?.completedAt);
   const intakeStarted = Boolean(intakeRecord?.intake);
   const scopeReady = intakeCompleted;
-  const hasDecisions = false;
+  const hasDecisions = decisions.length > 0;
 
   const overviewCards: OverviewCardProps[] = [
     {

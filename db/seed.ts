@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import {
   ActivityEventType,
   ContractorInvolvement,
+  DecisionStatus,
   PrismaClient,
   ProjectStatus,
   ProjectType,
@@ -167,6 +168,29 @@ async function main() {
       },
     });
   }
+
+  await prisma.decision.upsert({
+    where: {
+      id: "scopehouse-demo-decision",
+    },
+    update: {
+      projectId: project.id,
+      summary: "Confirm whether the owners want integrated or panel-ready refrigeration.",
+      owner: "Homeowner",
+      status: DecisionStatus.open,
+      recordedAt: new Date("2026-03-15T12:00:00.000Z"),
+      notes: "Affects cabinet layout, appliance allowances, and lead-time risk.",
+    },
+    create: {
+      id: "scopehouse-demo-decision",
+      projectId: project.id,
+      summary: "Confirm whether the owners want integrated or panel-ready refrigeration.",
+      owner: "Homeowner",
+      status: DecisionStatus.open,
+      recordedAt: new Date("2026-03-15T12:00:00.000Z"),
+      notes: "Affects cabinet layout, appliance allowances, and lead-time risk.",
+    },
+  });
 }
 
 main()

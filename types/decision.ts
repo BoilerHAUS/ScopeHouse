@@ -9,4 +9,7 @@ export type DecisionLogEntry = {
   owner: string;
   status: DecisionStatus;
   recordedAt: IsoDateString;
+  notes: string | null;
+  createdAt: IsoDateString;
+  updatedAt: IsoDateString;
 };

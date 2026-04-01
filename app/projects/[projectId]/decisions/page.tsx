@@ -1,19 +1,33 @@
-import { FeaturePlaceholder } from "@/components/feedback/feature-placeholder";
+import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/layout/page-container";
+import { DecisionLogManager } from "@/features/decisions/components/decision-log-manager";
+import { listProjectDecisionsForUser } from "@/features/decisions/queries/list-project-decisions";
+import { getProjectForUser } from "@/features/projects/queries/get-project";
+import { requireCurrentUser } from "@/server/auth/session";
 
-export default function ProjectDecisionsPage() {
+type ProjectDecisionsPageProps = {
+  params: Promise<{
+    projectId: string;
+  }>;
+};
+
+export default async function ProjectDecisionsPage({
+  params,
+}: ProjectDecisionsPageProps) {
+  const user = await requireCurrentUser();
+  const { projectId } = await params;
+  const [project, decisions] = await Promise.all([
+    getProjectForUser(projectId, user.id),
+    listProjectDecisionsForUser(projectId, user.id),
+  ]);
+
+  if (!project) {
+    notFound();
+  }
+
   return (
     <PageContainer>
-      <FeaturePlaceholder
-        eyebrow="Decisions"
-        title="Decision log"
-        description="Use this route for recording approvals, ownership, dates, and status changes in a clean audit trail."
-        points={[
-          "Keep decision status explicit.",
-          "Make entries easy to scan and export.",
-          "Connect changes back to project scope and budget context.",
-        ]}
-      />
+      <DecisionLogManager projectId={projectId} decisions={decisions} />
     </PageContainer>
   );
 }

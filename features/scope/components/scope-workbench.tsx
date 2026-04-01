@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { applyScopeDraftAction } from "@/features/scope/actions/apply-scope-draft";
 import { generateScopeDraftAction } from "@/features/scope/actions/generate-scope-draft";
 import type { ScopeActionState } from "@/features/scope/actions/scope-action-state";
+import { CreateScopeItemForm } from "@/features/scope/components/create-scope-item-form";
+import { ScopeItemEditorRow } from "@/features/scope/components/scope-item-editor-row";
 import type { ProjectScopeDraft, ProjectScopeGroup } from "@/types/scope";
 
 type ScopeWorkbenchProps = {
@@ -222,11 +224,22 @@ export function ScopeWorkbench({
       )}
 
       <section className="border-border bg-surface rounded-[2rem] border px-6 py-6 shadow-[0_18px_60px_rgba(54,42,20,0.08)]">
+        <h3 className="text-xl font-semibold">Manual scope editor</h3>
+        <p className="text-muted mt-3 max-w-2xl text-sm leading-7">
+          Add items manually, refine AI-applied work items, and reorder items
+          inside each area without leaving the scope route.
+        </p>
+        <div className="mt-8">
+          <CreateScopeItemForm projectId={projectId} />
+        </div>
+      </section>
+
+      <section className="border-border bg-surface rounded-[2rem] border px-6 py-6 shadow-[0_18px_60px_rgba(54,42,20,0.08)]">
         <h3 className="text-xl font-semibold">Applied project scope</h3>
         {appliedScope.length === 0 ? (
           <p className="text-muted mt-3 max-w-2xl text-sm leading-7">
-            No scope baseline has been applied yet. Review a draft and confirm
-            it before downstream budget, quote, and export flows depend on it.
+            No scope baseline exists yet. Generate a draft or add manual items
+            above to create the first structured scope.
           </p>
         ) : (
           <div className="mt-6 space-y-5">
@@ -243,23 +256,14 @@ export function ScopeWorkbench({
                         {area.areaName}
                       </p>
                       <div className="space-y-2">
-                        {area.items.map((item) => (
-                          <div
+                        {area.items.map((item, index) => (
+                          <ScopeItemEditorRow
                             key={item.id}
-                            className="bg-surface-strong/45 rounded-[1.25rem] px-4 py-4"
-                          >
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-sm font-medium">{item.label}</p>
-                              <span className="text-muted rounded-full bg-background px-2 py-1 text-[11px] uppercase">
-                                {formatStatusLabel(item.status)}
-                              </span>
-                            </div>
-                            {item.notes ? (
-                              <p className="text-muted mt-2 text-sm leading-6">
-                                {item.notes}
-                              </p>
-                            ) : null}
-                          </div>
+                            projectId={projectId}
+                            item={item}
+                            canMoveUp={index > 0}
+                            canMoveDown={index < area.items.length - 1}
+                          />
                         ))}
                       </div>
                     </div>

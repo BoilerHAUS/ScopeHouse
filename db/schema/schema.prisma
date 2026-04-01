@@ -77,6 +77,13 @@ enum AiGenerationStatus {
   failed
 }
 
+enum DecisionStatus {
+  open
+  approved
+  rejected
+  deferred
+}
+
 model User {
   id              String            @id @default(cuid())
   email           String            @unique
@@ -130,6 +137,7 @@ model Project {
   updatedAt     DateTime       @updatedAt
   activityLogs  ActivityLog[]
   aiGenerations AiGeneration[]
+  decisions     Decision[]
   intake        ProjectIntake?
   scopeDrafts   ScopeDraft[]
   scopeItems    ScopeItem[]
@@ -243,6 +251,22 @@ model AiGeneration {
 
   @@index([projectId, createdAt])
   @@index([workflow, createdAt])
+  @@index([status])
+}
+
+model Decision {
+  id         String         @id @default(cuid())
+  projectId  String
+  summary    String
+  owner      String
+  status     DecisionStatus @default(open)
+  recordedAt DateTime
+  notes      String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, recordedAt])
   @@index([status])
 }
 
