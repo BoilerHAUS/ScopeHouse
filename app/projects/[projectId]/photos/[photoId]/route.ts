@@ -47,7 +47,7 @@ export async function GET(_request: Request, context: RouteContext) {
   try {
     const fileBuffer = await readProjectFileBuffer(photo.storageKey);
 
-    return new Response(fileBuffer, {
+    return new Response(new Uint8Array(fileBuffer), {
       headers: {
         "Content-Type": photo.contentType,
         "Content-Disposition": `inline; filename="${toContentDispositionFilename(photo.originalName)}"`,

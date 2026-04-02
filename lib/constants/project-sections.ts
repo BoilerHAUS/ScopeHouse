@@ -45,6 +45,11 @@ export const PROJECT_SECTION_ITEMS = [
     description: "Structured change tracking and impact context.",
   },
   {
+    label: "Quotes",
+    segment: "quotes",
+    description: "Contractor quotes and AI-assisted comparison.",
+  },
+  {
     label: "Export",
     segment: "export",
     description: "Shareable project summaries and PDF output.",

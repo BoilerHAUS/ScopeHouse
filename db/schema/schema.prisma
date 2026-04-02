@@ -67,6 +67,9 @@ enum ActivityEventType {
   change_order_saved
   change_order_deleted
   progress_summary_generated
+  quote_comparison_generated
+  quote_saved
+  quote_deleted
 }
 
 enum ScopeItemStatus {
@@ -181,6 +184,7 @@ model Project {
   photos        ProjectPhoto[]
   scheduleMilestones ScheduleMilestone[]
   schedulePhases SchedulePhase[]
+  quotes        Quote[]
   scopeDrafts   ScopeDraft[]
   scopeItems    ScopeItem[]
   createdBy     User           @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
@@ -455,6 +459,21 @@ model ChangeOrder {
   @@index([scopeItemId])
   @@index([budgetLineId])
   @@index([scheduleMilestoneId])
+}
+
+model Quote {
+  id             String   @id @default(cuid())
+  projectId      String
+  contractor     String
+  amountCents    Int?
+  scopeReference String?
+  notes          String?
+  itemOrder      Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, itemOrder])
 }
 
 model Session {
