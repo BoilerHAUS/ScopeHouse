@@ -7,6 +7,10 @@ import { logProjectActivity } from "@/server/activity/log";
 import { generateProjectProgressSummaryForUser } from "@/features/ai/services/generate-project-progress-summary";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import { normalizeAiWorkflowError } from "@/server/ai/errors";
+import {
+  isRateLimitExceededError,
+  rateLimitAiByProject,
+} from "@/server/rate-limit/limit";
 
 export type ProjectProgressSummaryActionState = {
   error?: string;
@@ -57,11 +61,21 @@ export async function generateProjectProgressSummaryActionWithDependencies(
     | undefined;
 
   try {
+    await rateLimitAiByProject(projectId);
     result = await dependencies.generateProjectProgressSummaryForUser(
       projectId,
       user.id,
     );
   } catch (error) {
+    if (isRateLimitExceededError(error)) {
+      return {
+        error: error.message,
+        errorTitle: "Rate limit reached",
+        errorCode: "rate-limit-exceeded",
+        helpText: "Wait a few minutes before generating another project summary.",
+      } satisfies ProjectProgressSummaryActionState;
+    }
+
     const normalizedError = normalizeAiWorkflowError(
       error,
       "AI project summary generation",

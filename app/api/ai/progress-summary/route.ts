@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/server/auth/session";
 import { generateProjectProgressSummaryForUser } from "@/features/ai/services/generate-project-progress-summary";
 import { normalizeAiWorkflowError } from "@/server/ai/errors";
+import {
+  isRateLimitExceededError,
+  rateLimitAiByProject,
+} from "@/server/rate-limit/limit";
 
 type ProgressSummaryRouteBody = {
   projectId?: string;
@@ -35,6 +39,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    await rateLimitAiByProject(body.projectId);
     const summary = await generateProjectProgressSummaryForUser(body.projectId, user.id);
 
     return NextResponse.json({
@@ -48,6 +53,23 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
+    if (isRateLimitExceededError(error)) {
+      return NextResponse.json(
+        {
+          workflow: "progress-summary",
+          status: "rate-limited",
+          message: error.message,
+          retryAfterSeconds: error.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(error.retryAfterSeconds),
+          },
+        },
+      );
+    }
+
     const normalizedError = normalizeAiWorkflowError(
       error,
       "AI project summary generation",

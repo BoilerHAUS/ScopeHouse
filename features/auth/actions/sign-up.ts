@@ -6,11 +6,28 @@ import { createSession } from "@/server/auth/session";
 import { createUserWithWorkspace } from "@/server/auth/user";
 import type { AuthActionState } from "@/features/auth/actions/auth-action-state";
 import { signUpSchema } from "@/features/auth/schemas/sign-up";
+import { rateLimitAuthByIp } from "@/server/rate-limit/limit";
+import { getRequestIpAddress } from "@/server/rate-limit/request";
 
 export async function signUpAction(
   _previousState: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  try {
+    await rateLimitAuthByIp(await getRequestIpAddress());
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Too many sign-up attempts. Try again in a few minutes.",
+      formValues: {
+        name: String(formData.get("name") ?? "").trim(),
+        email: String(formData.get("email") ?? "").trim(),
+      },
+    };
+  }
+
   const result = signUpSchema.safeParse({
     name: String(formData.get("name") ?? ""),
     email: String(formData.get("email") ?? ""),

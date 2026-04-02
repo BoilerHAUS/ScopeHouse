@@ -27,6 +27,12 @@ Set these in Dokploy under **Environment → Variables**.
 | `DATABASE_URL` | Yes | — | PostgreSQL connection string (`postgresql://user:pass@host:5432/db`) |
 | `OPENAI_API_KEY` | No | — | Enables AI quote comparison. Leave unset to disable gracefully. |
 | `OPENAI_MODEL` | No | `gpt-5-mini` | OpenAI model ID to use |
+| `RATE_LIMIT_AUTH_MAX_REQUESTS` | No | `10` | Max auth attempts per IP inside the auth window |
+| `RATE_LIMIT_AUTH_WINDOW_SECONDS` | No | `300` | Auth rate-limit window in seconds |
+| `RATE_LIMIT_UPLOAD_MAX_REQUESTS` | No | `20` | Max uploads per user inside the upload window |
+| `RATE_LIMIT_UPLOAD_WINDOW_SECONDS` | No | `600` | Upload rate-limit window in seconds |
+| `RATE_LIMIT_AI_MAX_REQUESTS` | No | `6` | Max AI generations per project inside the AI window |
+| `RATE_LIMIT_AI_WINDOW_SECONDS` | No | `900` | AI rate-limit window in seconds |
 | `PROJECT_FILES_BACKEND` | No | `local` | Storage backend selector. Current supported value: `local` |
 | `PROJECT_FILES_DIR` | No | `.storage` | Path inside the container where uploaded files are stored |
 | `PROJECT_FILES_BUCKET` | No | `project-files` | Storage bucket label (used by the adapter boundary) |
@@ -54,6 +60,23 @@ Migration path for a future production backend:
 2. Register it in `server/storage/adapter.ts`.
 3. Switch `PROJECT_FILES_BACKEND` in the environment.
 4. Migrate existing files from the local volume into the new backend.
+
+## Rate limiting
+
+ScopeHouse applies lightweight in-memory rate limiting at the highest-risk entry points:
+
+- auth actions are limited per IP
+- upload actions are limited per user
+- AI generation routes and actions are limited per project
+
+This implementation is intentionally simple for MVP and current deployment targets.
+It is instance-local, so multi-replica deployments should treat it as a guardrail rather than a hard abuse boundary.
+
+If stronger enforcement is needed later:
+
+1. Keep the current `server/rate-limit/` boundary.
+2. Replace the in-memory store with a shared store or platform-native limiter.
+3. Keep the action and route call sites unchanged.
 
 ## Migration strategy
 

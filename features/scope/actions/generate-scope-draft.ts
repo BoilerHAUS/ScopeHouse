@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireCurrentUser } from "@/server/auth/session";
 import { generateScopeDraftForUser } from "@/features/ai/services/generate-scope-draft";
 import type { ScopeActionState } from "@/features/scope/actions/scope-action-state";
+import { rateLimitAiByProject } from "@/server/rate-limit/limit";
 
 export async function generateScopeDraftAction(
   projectId: string,
@@ -14,6 +15,7 @@ export async function generateScopeDraftAction(
   const user = await requireCurrentUser();
 
   try {
+    await rateLimitAiByProject(projectId);
     await generateScopeDraftForUser(projectId, user.id);
   } catch (error) {
     return {

@@ -6,6 +6,10 @@ import { logProjectActivity } from "@/server/activity/log";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
 import { generateQuoteComparisonForUser } from "@/features/ai/services/generate-quote-comparison";
 import { normalizeAiWorkflowError } from "@/server/ai/errors";
+import {
+  isRateLimitExceededError,
+  rateLimitAiByProject,
+} from "@/server/rate-limit/limit";
 
 export type QuoteComparisonActionState = {
   error?: string;
@@ -54,8 +58,18 @@ export async function generateQuoteComparisonActionWithDependencies(
     | undefined;
 
   try {
+    await rateLimitAiByProject(projectId);
     result = await dependencies.generateQuoteComparisonForUser(projectId, user.id);
   } catch (error) {
+    if (isRateLimitExceededError(error)) {
+      return {
+        error: error.message,
+        errorTitle: "Rate limit reached",
+        errorCode: "rate-limit-exceeded",
+        helpText: "Wait a few minutes before running another quote comparison.",
+      } satisfies QuoteComparisonActionState;
+    }
+
     const normalizedError = normalizeAiWorkflowError(error, "AI quote comparison");
 
     return {

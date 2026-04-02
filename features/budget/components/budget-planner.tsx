@@ -280,6 +280,13 @@ export function BudgetPlanner({
           Use categories and planning-first line items to build a first-pass
           budget without turning the app into accounting software.
         </p>
+        <div className="mt-5">
+          <Button asChild variant="outline" className="rounded-full px-4">
+            <a href={`/projects/${projectId}/budget/csv`} download>
+              Download budget CSV
+            </a>
+          </Button>
+        </div>
         <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {[
             ["Estimate total", budget.totals.estimateCents],

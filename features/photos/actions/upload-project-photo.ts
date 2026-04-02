@@ -7,6 +7,7 @@ import { db } from "@/server/db/client";
 import { logProjectActivity } from "@/server/activity/log";
 import { getPhotoContentType, MAX_PHOTO_SIZE_BYTES } from "@/server/storage/file-rules";
 import { saveProjectFile } from "@/server/storage/project-files";
+import { rateLimitUploadsByUser } from "@/server/rate-limit/limit";
 import {
   photoUploadMetadataSchema,
   type PhotoUploadActionState,
@@ -55,6 +56,17 @@ export async function uploadProjectPhotoActionWithDependencies(
   if (!project) {
     return {
       error: "Project not found.",
+    };
+  }
+
+  try {
+    await rateLimitUploadsByUser(user.id);
+  } catch (error) {
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "Too many uploads right now. Try again in a few minutes.",
     };
   }
 

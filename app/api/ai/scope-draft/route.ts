@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/server/auth/session";
 import { generateScopeDraftForUser } from "@/features/ai/services/generate-scope-draft";
+import {
+  isRateLimitExceededError,
+  rateLimitAiByProject,
+} from "@/server/rate-limit/limit";
 
 type ScopeDraftRouteBody = {
   projectId?: string;
@@ -34,6 +38,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    await rateLimitAiByProject(body.projectId);
     const draft = await generateScopeDraftForUser(body.projectId, user.id);
 
     return NextResponse.json({
@@ -45,6 +50,23 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
+    if (isRateLimitExceededError(error)) {
+      return NextResponse.json(
+        {
+          workflow: "scope-draft",
+          status: "rate-limited",
+          message: error.message,
+          retryAfterSeconds: error.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(error.retryAfterSeconds),
+          },
+        },
+      );
+    }
+
     return NextResponse.json(
       {
         workflow: "scope-draft",

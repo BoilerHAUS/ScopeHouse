@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/server/auth/session";
 import { generateQuoteComparisonForUser } from "@/features/ai/services/generate-quote-comparison";
 import { normalizeAiWorkflowError } from "@/server/ai/errors";
+import {
+  isRateLimitExceededError,
+  rateLimitAiByProject,
+} from "@/server/rate-limit/limit";
 
 type QuoteCompareRouteBody = {
   projectId?: string;
@@ -35,6 +39,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    await rateLimitAiByProject(body.projectId);
     const comparison = await generateQuoteComparisonForUser(body.projectId, user.id);
 
     return NextResponse.json({
@@ -48,6 +53,23 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
+    if (isRateLimitExceededError(error)) {
+      return NextResponse.json(
+        {
+          workflow: "quote-compare",
+          status: "rate-limited",
+          message: error.message,
+          retryAfterSeconds: error.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(error.retryAfterSeconds),
+          },
+        },
+      );
+    }
+
     const normalizedError = normalizeAiWorkflowError(
       error,
       "AI quote comparison",

@@ -53,6 +53,13 @@ export function ScopeWorkbench({
               draft by phase and area, then explicitly apply it to the project
               baseline.
             </p>
+            <div className="mt-5">
+              <Button asChild variant="outline" className="rounded-full px-4">
+                <a href={`/projects/${projectId}/scope/csv`} download>
+                  Download scope CSV
+                </a>
+              </Button>
+            </div>
           </div>
 
           <form action={generateAction}>
