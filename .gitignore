@@ -143,3 +143,7 @@ db/generated/
 
 # Local uploaded project files
 .storage/
+
+# Claude
+./claude-*.json
+.claude/
