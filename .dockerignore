@@ -1,0 +1,35 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies (reinstalled in Docker)
+node_modules
+
+# Build output (rebuilt in Docker)
+.next
+out
+
+# Local dev environment
+.env
+.env.*
+!.env.example
+.storage
+docker-compose.yml
+
+# Editor and tooling
+.vscode
+.claude
+*.tsbuildinfo
+
+# Tests and coverage
+tests
+coverage
+.nyc_output
+
+# Documentation (not needed at runtime)
+docs
+*.md
+!scripts
+
+# Logs
+*.log
