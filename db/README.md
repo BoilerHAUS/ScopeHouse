@@ -86,8 +86,15 @@ The document and photo foundation now adds:
 - document metadata with uploader linkage, size, type, and tags
 - photo metadata with caption, room tag, phase tag, taken date, and upload date
 - local storage-backed secure retrieval paths for project assets
+- a storage adapter boundary so future object storage backends can replace local files without feature rewrites
 
 The change and AI summary foundation now adds:
 
 - project-linked change orders with impact summaries and lightweight budget or schedule references
 - reusable AI project summaries sourced from intake, scope, decisions, and change orders
+
+The quote comparison foundation now adds:
+
+- project-linked contractor quotes with amount, scope reference, and notes
+- AI quote comparisons logged through `AiGeneration`
+- versioned quote comparison prompts in `prompts/quote-compare/`

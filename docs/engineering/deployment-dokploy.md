@@ -27,6 +27,7 @@ Set these in Dokploy under **Environment → Variables**.
 | `DATABASE_URL` | Yes | — | PostgreSQL connection string (`postgresql://user:pass@host:5432/db`) |
 | `OPENAI_API_KEY` | No | — | Enables AI quote comparison. Leave unset to disable gracefully. |
 | `OPENAI_MODEL` | No | `gpt-5-mini` | OpenAI model ID to use |
+| `PROJECT_FILES_BACKEND` | No | `local` | Storage backend selector. Current supported value: `local` |
 | `PROJECT_FILES_DIR` | No | `.storage` | Path inside the container where uploaded files are stored |
 | `PROJECT_FILES_BUCKET` | No | `project-files` | Storage bucket label (used by the adapter boundary) |
 | `NODE_ENV` | — | set in Dockerfile | Always `production` in the container |
@@ -38,6 +39,21 @@ Until a cloud storage adapter is in place, uploaded project files are written to
 **You must mount a persistent volume at `/app/.storage`** — or at whatever path `PROJECT_FILES_DIR` points to — otherwise uploaded files will be lost on container restarts.
 
 In Dokploy: **Volumes → Add volume**, set the container path to `/app/.storage`.
+
+## Storage adapter boundary
+
+ScopeHouse now resolves file storage through `server/storage/adapter.ts` and `server/storage/project-files.ts`.
+
+- `PROJECT_FILES_BACKEND=local` keeps the current filesystem-backed behavior
+- future object storage support should be added as a new adapter behind the same boundary
+- feature-layer code should not import a concrete storage backend directly
+
+Migration path for a future production backend:
+
+1. Add a new adapter implementation in `server/storage/`.
+2. Register it in `server/storage/adapter.ts`.
+3. Switch `PROJECT_FILES_BACKEND` in the environment.
+4. Migrate existing files from the local volume into the new backend.
 
 ## Migration strategy
 
