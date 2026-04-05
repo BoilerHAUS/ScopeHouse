@@ -1,16 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Route } from "next";
+import {
+  Badge,
+  Card,
+  CardBody,
+  CardHeader,
+  Stat,
+} from "@/components/ui/boilerhaus";
 import { PageContainer } from "@/components/layout/page-container";
 import { Button } from "@/components/ui/button";
-import { requireCurrentUser } from "@/server/auth/session";
 import { listProjectChangeOrdersForUser } from "@/features/change-orders/queries/list-project-change-orders";
 import { listProjectDecisionsForUser } from "@/features/decisions/queries/list-project-decisions";
+import { getProjectIntakeForUser } from "@/features/intake/queries/get-project-intake";
 import { archiveProjectAction } from "@/features/projects/actions/archive-project";
 import { getProjectForUser } from "@/features/projects/queries/get-project";
-import { getProjectIntakeForUser } from "@/features/intake/queries/get-project-intake";
 import { listProjectActivityForUser } from "@/features/projects/queries/list-project-activity";
 import { restoreProjectAction } from "@/features/projects/actions/restore-project";
+import { requireCurrentUser } from "@/server/auth/session";
 
 function formatLabel(value: string) {
   return value.replaceAll("_", " ");
@@ -24,17 +31,42 @@ type OverviewCardProps = {
   cta: string;
 };
 
+function getOverviewVariant(status: string) {
+  if (status.toLowerCase().includes("ready")) {
+    return "success";
+  }
+
+  if (status.toLowerCase().includes("waiting")) {
+    return "warning";
+  }
+
+  if (status.toLowerCase().includes("not")) {
+    return "neutral";
+  }
+
+  return "active";
+}
+
 function OverviewCard({ href, title, status, summary, cta }: OverviewCardProps) {
   return (
-    <Link
-      href={href}
-      className="border-border bg-surface hover:border-accent block rounded-[1.75rem] border px-5 py-5 shadow-[0_16px_40px_rgba(54,42,20,0.05)] transition"
-    >
-      <p className="text-muted text-xs uppercase tracking-[0.2em]">{title}</p>
-      <p className="mt-3 text-lg font-semibold">{status}</p>
-      <p className="text-muted mt-3 text-sm leading-7">{summary}</p>
-      <p className="mt-5 text-sm font-medium">{cta}</p>
-    </Link>
+    <Card className="border-rule bg-white/88 shadow-[var(--shadow-md)] transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)]">
+      <Link href={href} className="block">
+        <CardHeader className="flex-col items-start gap-4 border-b border-rule px-5 py-5">
+          <div className="flex w-full items-center justify-between gap-3">
+            <p className="font-mono text-xs tracking-[0.24em] text-smoke uppercase">
+              {title}
+            </p>
+            <Badge variant={getOverviewVariant(status)}>{status}</Badge>
+          </div>
+        </CardHeader>
+        <CardBody className="space-y-4 px-5 py-5">
+          <p className="text-sm leading-7 text-smoke">{summary}</p>
+          <p className="font-display text-sm tracking-[0.12em] uppercase text-signal-alt">
+            {cta}
+          </p>
+        </CardBody>
+      </Link>
+    </Card>
   );
 }
 
@@ -49,13 +81,14 @@ export default async function ProjectWorkspacePage({
 }: ProjectWorkspacePageProps) {
   const user = await requireCurrentUser();
   const { projectId } = await params;
-  const [project, intakeRecord, activity, decisions, changeOrders] = await Promise.all([
-    getProjectForUser(projectId, user.id),
-    getProjectIntakeForUser(projectId, user.id),
-    listProjectActivityForUser(projectId, user.id),
-    listProjectDecisionsForUser(projectId, user.id),
-    listProjectChangeOrdersForUser(projectId, user.id),
-  ]);
+  const [project, intakeRecord, activity, decisions, changeOrders] =
+    await Promise.all([
+      getProjectForUser(projectId, user.id),
+      getProjectIntakeForUser(projectId, user.id),
+      listProjectActivityForUser(projectId, user.id),
+      listProjectDecisionsForUser(projectId, user.id),
+      listProjectChangeOrdersForUser(projectId, user.id),
+    ]);
 
   if (!project || !changeOrders) {
     notFound();
@@ -70,6 +103,12 @@ export default async function ProjectWorkspacePage({
   const scopeReady = intakeCompleted;
   const hasDecisions = decisions.length > 0;
   const hasChangeOrders = changeOrders.length > 0;
+  const readyModules = [
+    intakeCompleted,
+    scopeReady,
+    hasDecisions,
+    hasChangeOrders,
+  ].filter(Boolean).length;
 
   const overviewCards: OverviewCardProps[] = [
     {
@@ -127,84 +166,100 @@ export default async function ProjectWorkspacePage({
 
   return (
     <PageContainer>
-      <section className="border-border bg-surface rounded-[2rem] border px-6 py-6 shadow-[0_18px_60px_rgba(54,42,20,0.08)]">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div>
-            <p className="text-muted font-mono text-xs tracking-[0.24em] uppercase">
-              Project
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.04em]">
-              {project.title}
-            </h2>
-            <p className="text-muted mt-3 max-w-2xl text-sm leading-7">
-              {project.archivedAt
-                ? "This project is archived. It stays intact, but it is hidden from the active project list until restored."
-                : "The project shell is active. Continue with intake to capture the room list, goals, budget range, timing, and constraints that will drive the first scope draft."}
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 lg:items-end">
-            <form action={lifecycleAction}>
-              <Button
-                type="submit"
-                variant={project.archivedAt ? "default" : "outline"}
-                className="rounded-full px-5"
-              >
-                {project.archivedAt ? "Restore project" : "Archive project"}
-              </Button>
-            </form>
-            <div className="grid gap-3 sm:grid-cols-2 lg:w-[360px]">
-              <div className="bg-surface-strong/55 rounded-[1.5rem] px-4 py-4">
-                <p className="text-muted text-xs uppercase tracking-[0.2em]">
-                  Status
-                </p>
-                <p className="mt-2 text-base font-semibold capitalize">
-                  {formatLabel(project.status)}
-                </p>
-              </div>
-              <div className="bg-surface-strong/55 rounded-[1.5rem] px-4 py-4">
-                <p className="text-muted text-xs uppercase tracking-[0.2em]">
-                  Type
-                </p>
-                <p className="mt-2 text-base font-semibold capitalize">
-                  {formatLabel(project.projectType)}
-                </p>
-              </div>
+      <Card className="border-rule bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-paper)_94%,white)_0%,color-mix(in_srgb,var(--color-paper)_88%,var(--color-signal))_52%,color-mix(in_srgb,var(--color-paper)_90%,var(--color-signal-alt))_100%)] shadow-[var(--shadow-xl)]">
+        <CardHeader className="flex-col gap-5 border-b border-rule px-6 py-6 lg:px-8 lg:py-8">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="font-mono text-xs tracking-[0.28em] text-smoke uppercase">
+                Project
+              </p>
+              <h2 className="mt-3 font-display text-4xl leading-none tracking-[0.08em] uppercase text-void lg:text-5xl">
+                {project.title}
+              </h2>
+              <p className="mt-4 max-w-2xl text-sm leading-8 text-smoke lg:text-base">
+                {project.archivedAt
+                  ? "This project is archived. It stays intact, but it is hidden from the active project list until restored."
+                  : "The project shell is active. Continue with intake to capture the room list, goals, budget range, timing, and constraints that will drive the first scope draft."}
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 lg:items-end">
+              <Badge variant={project.archivedAt ? "warning" : "active"}>
+                {project.archivedAt ? "Archived workspace" : "Active workspace"}
+              </Badge>
+              <form action={lifecycleAction}>
+                <Button
+                  type="submit"
+                  variant={project.archivedAt ? "default" : "outline"}
+                >
+                  {project.archivedAt ? "Restore project" : "Archive project"}
+                </Button>
+              </form>
             </div>
           </div>
-        </div>
+        </CardHeader>
 
-        {project.archivedAt ? (
-          <div className="mt-6 rounded-[1.5rem] border border-stone-300 bg-stone-50 px-5 py-4">
-            <p className="text-muted text-xs uppercase tracking-[0.2em]">
-              Archived
-            </p>
-            <p className="mt-2 text-sm leading-7">
-              Archived on {project.archivedAt.toLocaleDateString()}. Restore the
-              project when it needs to return to the active workspace list.
-            </p>
-          </div>
-        ) : null}
+        <CardBody className="space-y-6 px-6 py-6 lg:px-8">
+          {project.archivedAt ? (
+            <div className="border border-rule bg-white/72 px-5 py-4">
+              <p className="font-mono text-xs tracking-[0.24em] text-smoke uppercase">
+                Archived
+              </p>
+              <p className="mt-2 text-sm leading-7 text-smoke">
+                Archived on {project.archivedAt.toLocaleDateString()}. Restore
+                the project when it needs to return to the active workspace
+                list.
+              </p>
+            </div>
+          ) : null}
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
-          <div className="border-border rounded-[1.5rem] border px-5 py-5">
-            <p className="text-muted text-xs uppercase tracking-[0.2em]">
-              Location
-            </p>
-            <p className="mt-2 text-sm leading-7">
-              {project.locationLabel ?? "Location not captured yet."}
-            </p>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <Stat
+              label="Status"
+              value={formatLabel(project.status)}
+              caption="workspace state"
+              className="border border-rule bg-white/72"
+            />
+            <Stat
+              label="Type"
+              value={formatLabel(project.projectType)}
+              caption="renovation category"
+              className="border border-rule bg-white/72"
+            />
+            <Stat
+              label="Ready Modules"
+              value={`${readyModules}/4`}
+              caption="intake, scope, decisions, change log"
+              className="border border-rule bg-white/72"
+            />
+            <Stat
+              label="Activity"
+              value={activity.length}
+              caption="recent logged events"
+              className="border border-rule bg-white/72"
+            />
           </div>
-          <div className="border-border rounded-[1.5rem] border px-5 py-5">
-            <p className="text-muted text-xs uppercase tracking-[0.2em]">
-              Goals
-            </p>
-            <p className="mt-2 text-sm leading-7">
-              {project.goals ??
-                "No project goals captured yet. Add them in the next workflow steps."}
-            </p>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="border border-rule bg-white/72 px-5 py-5">
+              <p className="font-mono text-xs tracking-[0.24em] text-smoke uppercase">
+                Location
+              </p>
+              <p className="mt-3 text-sm leading-7 text-smoke">
+                {project.locationLabel ?? "Location not captured yet."}
+              </p>
+            </div>
+            <div className="border border-rule bg-white/72 px-5 py-5">
+              <p className="font-mono text-xs tracking-[0.24em] text-smoke uppercase">
+                Goals
+              </p>
+              <p className="mt-3 text-sm leading-7 text-smoke">
+                {project.goals ??
+                  "No project goals captured yet. Add them in the next workflow steps."}
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </CardBody>
+      </Card>
 
       <section className="grid gap-4 xl:grid-cols-2">
         {overviewCards.map((card) => (
@@ -213,11 +268,13 @@ export default async function ProjectWorkspacePage({
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_360px]">
-        <div className="border-border bg-surface rounded-[1.75rem] border px-5 py-5 shadow-[0_16px_40px_rgba(54,42,20,0.05)]">
-          <p className="text-muted font-mono text-xs tracking-[0.24em] uppercase">
-            Next actions
-          </p>
-          <div className="mt-4 space-y-3 text-sm leading-7">
+        <Card className="border-rule bg-white/88 shadow-[var(--shadow-md)]">
+          <CardHeader className="flex-col items-start gap-3 border-b border-rule px-5 py-5">
+            <p className="font-mono text-xs tracking-[0.24em] text-smoke uppercase">
+              Next actions
+            </p>
+          </CardHeader>
+          <CardBody className="space-y-3 px-5 py-5 text-sm leading-7 text-smoke">
             <p>
               {intakeCompleted
                 ? "Intake is complete. The next useful move is generating or drafting the first scope structure."
@@ -227,34 +284,38 @@ export default async function ProjectWorkspacePage({
               Keep this overview page as the control center for module state and
               route entry, not a bloated dashboard.
             </p>
-          </div>
-        </div>
+          </CardBody>
+        </Card>
 
-        <div className="border-border bg-surface rounded-[1.75rem] border px-5 py-5 shadow-[0_16px_40px_rgba(54,42,20,0.05)]">
-          <p className="text-muted font-mono text-xs tracking-[0.24em] uppercase">
-            Recent activity
-          </p>
-          <div className="mt-4 space-y-3">
+        <Card className="border-rule bg-white/88 shadow-[var(--shadow-md)]">
+          <CardHeader className="flex-col items-start gap-3 border-b border-rule px-5 py-5">
+            <p className="font-mono text-xs tracking-[0.24em] text-smoke uppercase">
+              Recent activity
+            </p>
+          </CardHeader>
+          <CardBody className="space-y-3 px-5 py-5">
             {activity.length === 0 ? (
-              <p className="text-muted text-sm leading-7">
+              <p className="text-sm leading-7 text-smoke">
                 No project activity has been recorded yet.
               </p>
             ) : (
               activity.slice(0, 6).map((entry) => (
                 <div
                   key={entry.id}
-                  className="border-border rounded-[1.35rem] border px-4 py-4"
+                  className="border border-rule bg-white/60 px-4 py-4"
                 >
-                  <p className="text-sm font-medium">{entry.summary}</p>
-                  <p className="text-muted mt-2 text-xs leading-5">
+                  <p className="text-sm font-medium text-void">
+                    {entry.summary}
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-smoke">
                     {entry.actor?.name ?? "Unknown actor"} ·{" "}
                     {entry.createdAt.toLocaleString()}
                   </p>
                 </div>
               ))
             )}
-          </div>
-        </div>
+          </CardBody>
+        </Card>
       </section>
     </PageContainer>
   );

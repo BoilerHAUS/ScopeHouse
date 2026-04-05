@@ -7,5 +7,9 @@ type PageContainerProps = {
 };
 
 export function PageContainer({ children, className }: PageContainerProps) {
-  return <div className={cn("w-full space-y-6", className)}>{children}</div>;
+  return (
+    <div className={cn("w-full space-y-6 lg:space-y-8", className)}>
+      {children}
+    </div>
+  );
 }

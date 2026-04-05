@@ -1,30 +1,34 @@
 @import "tailwindcss";
+@import "@boilerhaus-ui/boilerhaus-ui/tokens.css";
+@source "../node_modules/@boilerhaus-ui/boilerhaus-ui/dist";
 
 :root {
-  --background: #f4efe6;
-  --foreground: #1b1b18;
-  --surface: #fffaf2;
-  --surface-strong: #f0e5d5;
+  --font-family-display: var(--font-barlow-condensed), sans-serif;
+  --font-family-body: var(--font-dm-sans), sans-serif;
+  --font-family-mono: var(--font-jetbrains-mono), monospace;
+  --background: var(--color-paper);
+  --foreground: var(--color-void);
+  --surface: color-mix(in srgb, white 82%, var(--color-paper));
+  --surface-strong: color-mix(in srgb, var(--color-paper) 86%, var(--color-rule));
   --card: var(--surface);
   --card-foreground: var(--foreground);
-  --popover: #fffdf8;
+  --popover: color-mix(in srgb, white 88%, var(--color-paper));
   --popover-foreground: var(--foreground);
-  --primary: #0d6b68;
-  --primary-foreground: #f7fbfa;
-  --secondary: #e8dbc8;
-  --secondary-foreground: #2d271f;
-  --muted: #645e55;
-  --muted-foreground: #645e55;
-  --accent: #d6ecea;
-  --accent-foreground: #183836;
-  --destructive: #a2481f;
-  --destructive-foreground: #fff7f2;
-  --border: #d6cab7;
-  --input: #d6cab7;
-  --ring: #0d6b68;
-  --muted: #645e55;
-  --accent-soft: #d6ecea;
-  --warning: #9e5c26;
+  --primary: var(--color-signal);
+  --primary-foreground: var(--color-paper);
+  --secondary: color-mix(in srgb, var(--color-paper) 78%, var(--color-rule));
+  --secondary-foreground: var(--color-void);
+  --muted: var(--color-smoke);
+  --muted-foreground: var(--color-smoke);
+  --accent: color-mix(in srgb, var(--color-paper) 72%, var(--color-signal-alt));
+  --accent-foreground: var(--color-void);
+  --destructive: var(--color-signal);
+  --destructive-foreground: var(--color-paper);
+  --border: var(--color-rule);
+  --input: color-mix(in srgb, var(--color-paper) 68%, var(--color-rule));
+  --ring: var(--color-signal-alt);
+  --accent-soft: color-mix(in srgb, var(--color-paper) 84%, var(--color-signal-alt));
+  --warning: var(--color-caution);
 }
 
 @theme inline {
@@ -51,8 +55,8 @@
   --color-ring: var(--ring);
   --color-accent-soft: var(--accent-soft);
   --color-warning: var(--warning);
-  --font-sans: var(--font-manrope);
-  --font-mono: var(--font-ibm-plex-mono);
+  --font-sans: var(--font-family-body);
+  --font-mono: var(--font-family-mono);
 }
 
 * {
@@ -60,20 +64,24 @@
 }
 
 html {
-  background:
-    radial-gradient(
-      circle at top left,
-      rgba(13, 107, 104, 0.1),
-      transparent 28%
-    ),
-    linear-gradient(180deg, #f8f3eb 0%, #efe5d8 100%);
+  background: var(--color-paper);
+  color: var(--foreground);
 }
 
 body {
   min-height: 100vh;
   margin: 0;
   color: var(--foreground);
-  font-family: var(--font-manrope), sans-serif;
+  font-family: var(--font-family-body), sans-serif;
+  line-height: 1.6;
+  background:
+    linear-gradient(
+      115deg,
+      color-mix(in srgb, var(--color-paper) 92%, white) 0%,
+      color-mix(in srgb, var(--color-paper) 96%, var(--color-signal-alt)) 44%,
+      color-mix(in srgb, var(--color-paper) 92%, white) 100%
+    );
+  background-attachment: fixed;
 }
 
 a {
@@ -81,6 +89,17 @@ a {
   text-decoration: none;
 }
 
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+main {
+  min-width: 0;
+}
+
 ::selection {
-  background: rgba(13, 107, 104, 0.18);
+  background: color-mix(in srgb, var(--color-signal-alt) 26%, white);
 }
