@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 type BadgeVariant = "neutral" | "active" | "warning" | "danger" | "success";
@@ -113,22 +112,52 @@ export function PageShellNavItem({
   children,
   ...props
 }: PageShellNavItemProps) {
-  const Comp = asChild ? Slot.Root : "button";
-
-  return (
-    <Comp
-      className={cn(
-        "flex w-full items-start gap-3 border-l-2 px-3 py-3 text-left transition",
-        active
-          ? "border-signal bg-white/8 text-white"
-          : "border-white/10 text-white/72 hover:border-white/40 hover:bg-white/5 hover:text-white",
-        className,
-      )}
-      {...props}
-    >
+  const itemClassName = cn(
+    "flex w-full items-start gap-3 border-l-2 px-3 py-3 text-left transition",
+    active
+      ? "border-signal bg-white/8 text-white"
+      : "border-white/10 text-white/72 hover:border-white/40 hover:bg-white/5 hover:text-white",
+    className,
+  );
+  const content = (
+    <>
       {icon ? <span className="mt-0.5 shrink-0">{icon}</span> : null}
       <span className="min-w-0 flex-1">{children}</span>
-    </Comp>
+    </>
+  );
+
+  if (asChild && React.isValidElement(children)) {
+    const child = children as React.ReactElement<{
+      className?: string;
+      children?: React.ReactNode;
+      "aria-current"?: "page";
+    }>;
+    const childProps = children.props as {
+      className?: string;
+      children?: React.ReactNode;
+      "aria-current"?: "page";
+    };
+
+    return React.cloneElement(
+      child,
+      {
+        className: cn(itemClassName, childProps.className),
+        "aria-current": active ? "page" : undefined,
+      },
+      <>
+        {icon ? <span className="mt-0.5 shrink-0">{icon}</span> : null}
+        <span className="min-w-0 flex-1">{childProps.children}</span>
+      </>,
+    );
+  }
+
+  return (
+    <button
+      className={itemClassName}
+      {...props}
+    >
+      {content}
+    </button>
   );
 }
 
